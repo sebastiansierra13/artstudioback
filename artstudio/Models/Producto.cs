@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace artstudio.Models
 {
@@ -14,6 +15,7 @@ namespace artstudio.Models
         public string? ListTags { get; set; }
         public int CantVendido { get; set; }
 
+        [JsonIgnore]
         public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
     }
 }

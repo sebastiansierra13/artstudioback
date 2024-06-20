@@ -1,10 +1,10 @@
 ﻿using artstudio.Models;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace artstudio.Controllers
-
 {
     [Route("api/categorias")]
     [ApiController]
@@ -22,6 +22,16 @@ namespace artstudio.Controllers
         public async Task<ActionResult<IEnumerable<Categoria>>> GetCategorias()
         {
             return await _context.Categorias.ToListAsync();
+        }
+
+        // GET: api/categorias/latest
+        [HttpGet("latest")]
+        public async Task<ActionResult<IEnumerable<Categoria>>> GetLatestCategorias()
+        {
+            return await _context.Categorias
+                .OrderByDescending(c => c.IdCategoria)
+                .Take(3)
+                .ToListAsync();
         }
 
         // GET: api/categorias/5
