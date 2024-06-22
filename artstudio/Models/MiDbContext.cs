@@ -17,6 +17,7 @@ namespace artstudio.Models
         }
 
         public virtual DbSet<Admin> Admins { get; set; } = null!;
+        public virtual DbSet<Banner> Banners { get; set; } = null!;
         public virtual DbSet<Categoria> Categorias { get; set; } = null!;
         public virtual DbSet<Precio> Precios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
@@ -28,7 +29,7 @@ namespace artstudio.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;database=art_studio;user=root;password=12345", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.4.0-mysql"));
+                optionsBuilder.UseMySql("server=localhost;database=art_studio;user=root;password=12345", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.1.0-mysql"));
             }
         }
 
@@ -51,6 +52,19 @@ namespace artstudio.Models
                     .HasColumnName("password");
             });
 
+            modelBuilder.Entity<Banner>(entity =>
+            {
+                entity.ToTable("banners");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Posicion).HasColumnName("posicion");
+
+                entity.Property(e => e.Url)
+                    .HasMaxLength(3000)
+                    .HasColumnName("url");
+            });
+
             modelBuilder.Entity<Categoria>(entity =>
             {
                 entity.HasKey(e => e.IdCategoria)
@@ -59,6 +73,10 @@ namespace artstudio.Models
                 entity.ToTable("categorias");
 
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
+
+                entity.Property(e => e.ImagenCategoria)
+                    .HasMaxLength(255)
+                    .HasColumnName("imagenCategoria");
 
                 entity.Property(e => e.NombreCategoria)
                     .HasMaxLength(255)
@@ -104,6 +122,8 @@ namespace artstudio.Models
                     .HasColumnType("text")
                     .HasColumnName("descripcionProducto");
 
+                entity.Property(e => e.Destacado).HasColumnName("destacado");
+
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
 
                 entity.Property(e => e.Imagenes)
@@ -121,6 +141,8 @@ namespace artstudio.Models
                 entity.Property(e => e.NombreProducto)
                     .HasMaxLength(255)
                     .HasColumnName("nombreProducto");
+
+                entity.Property(e => e.Posicion).HasColumnName("posicion");
 
                 entity.HasOne(d => d.IdCategoriaNavigation)
                     .WithMany(p => p.Productos)
