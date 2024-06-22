@@ -46,8 +46,45 @@ namespace artstudio.Controllers
             return CreatedAtAction(nameof(GetBanner), new { id = banner.Id },banner);
         }
 
-        // PUT: api/tags/5
-        [HttpPut("{id}")]
+        [HttpPost("bulk")]
+        public async Task<ActionResult<IEnumerable<Banner>>> PostBulkBanners(IEnumerable<string> urls)
+        {
+            if (urls == null || !urls.Any())
+            {
+                return BadRequest("No URLs provided.");
+            }
+
+            List<Banner> bannersToAdd = new List<Banner>();
+
+            foreach (var url in urls)
+            {
+                // Crear un nuevo objeto Banner con la URL proporcionada
+                Banner banner = new Banner
+                {
+                    Url = url
+                };
+
+                bannersToAdd.Add(banner);
+            }
+
+            // Agregar todos los banners a la base de datos y guardar cambios
+            _context.Banners.AddRange(bannersToAdd);
+            await _context.SaveChangesAsync();
+
+            // Retornar un ActionResult con todos los banners agregados
+            return CreatedAtAction(nameof(GetBulkBanners), bannersToAdd);
+        }
+
+        // Otro método para obtener los banners (ejemplo)
+        [HttpGet("bulk")]
+        public async Task<ActionResult<IEnumerable<Banner>>> GetBulkBanners()
+        {
+            return await _context.Banners.ToListAsync();
+        }
+    
+
+    // PUT: api/tags/5
+    [HttpPut("{id}")]
         public async Task<IActionResult> PutTag(int id, Tag tag)
         {
             if (id != tag.IdTag)
