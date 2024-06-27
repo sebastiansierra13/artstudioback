@@ -29,7 +29,7 @@ namespace artstudio.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseMySql("server=localhost;database=art_studio;user=root;password=admin123", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.4.0-mysql"));
+                optionsBuilder.UseMySql("server=localhost;database=art_studio;user=root;password=12345", Microsoft.EntityFrameworkCore.ServerVersion.Parse("8.4.0-mysql"));
             }
         }
 
@@ -65,23 +65,6 @@ namespace artstudio.Models
                     .HasColumnName("url");
             });
 
-            modelBuilder.Entity<Categoria>(entity =>
-            {
-                entity.HasKey(e => e.IdCategoria)
-                    .HasName("PRIMARY");
-
-                entity.ToTable("categorias");
-
-                entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
-
-                entity.Property(e => e.ImagenCategoria)
-                    .HasMaxLength(3000)
-                    .HasColumnName("imagenCategoria");
-
-                entity.Property(e => e.NombreCategoria)
-                    .HasMaxLength(255)
-                    .HasColumnName("nombreCategoria");
-            });
 
             modelBuilder.Entity<Precio>(entity =>
             {
@@ -103,6 +86,24 @@ namespace artstudio.Models
                 entity.Property(e => e.TamañoPoster)
                     .HasMaxLength(255)
                     .HasColumnName("tamañoPoster");
+            });
+
+            modelBuilder.Entity<Categoria>(entity =>
+            {
+                entity.HasKey(e => e.IdCategoria)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("categorias");
+
+                entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
+
+                entity.Property(e => e.ImagenCategoria)
+                    .HasMaxLength(3000)
+                    .HasColumnName("imagenCategoria");
+
+                entity.Property(e => e.NombreCategoria)
+                    .HasMaxLength(255)
+                    .HasColumnName("nombreCategoria");
             });
 
             modelBuilder.Entity<Producto>(entity =>
