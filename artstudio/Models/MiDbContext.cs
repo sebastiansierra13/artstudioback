@@ -65,7 +65,6 @@ namespace artstudio.Models
                     .HasColumnName("url");
             });
 
-
             modelBuilder.Entity<Precio>(entity =>
             {
                 entity.HasKey(e => e.IdPrecio)
@@ -128,7 +127,7 @@ namespace artstudio.Models
                 entity.Property(e => e.IdCategoria).HasColumnName("idCategoria");
 
                 entity.Property(e => e.Imagenes)
-                    .HasMaxLength(255)
+                    .HasColumnType("json") // Configura la propiedad como JSON
                     .HasColumnName("imagenes");
 
                 entity.Property(e => e.ListPrecios)
@@ -146,11 +145,11 @@ namespace artstudio.Models
                 entity.Property(e => e.Posicion).HasColumnName("posicion");
 
                 entity.HasOne(d => d.IdCategoriaNavigation)
-                    .WithMany(p => p.Productos)
-                    .HasForeignKey(d => d.IdCategoria)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("productos_ibfk_1");
-            });
+                        .WithMany(p => p.Productos)
+                        .HasForeignKey(d => d.IdCategoria)
+                        .OnDelete(DeleteBehavior.ClientSetNull)
+                        .HasConstraintName("productos_ibfk_1");
+                            });
 
             modelBuilder.Entity<Sort>(entity =>
             {
@@ -186,6 +185,7 @@ namespace artstudio.Models
 
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

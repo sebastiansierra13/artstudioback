@@ -41,11 +41,22 @@ namespace artstudio.Controllers
         [HttpPost]
         public async Task<ActionResult<Producto>> PostProducto(Producto producto)
         {
+            if (producto == null)
+            {
+                return BadRequest("El producto no puede ser nulo");
+            }
+
+            if (string.IsNullOrEmpty(producto.NombreProducto))
+            {
+                return BadRequest("El nombre del producto es requerido");
+            }
+
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetProducto), new { id = producto.IdProducto }, producto);
         }
+
 
         // PUT: api/productos/5
         [HttpPut("{id}")]

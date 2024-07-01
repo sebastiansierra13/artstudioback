@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace artstudio.Models
 {
@@ -16,6 +19,12 @@ namespace artstudio.Models
         public int? Posicion { get; set; }
         public bool? Destacado { get; set; }
 
-        public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
+        [JsonIgnore]
+        public virtual Categoria? IdCategoriaNavigation { get; set; }
+
+
+
+
+
     }
 }
