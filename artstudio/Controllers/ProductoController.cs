@@ -57,6 +57,21 @@ namespace artstudio.Controllers
             return CreatedAtAction(nameof(GetProducto), new { id = producto.IdProducto }, producto);
         }
 
+        // GET: api/productos/categoria/5
+        [HttpGet("categoria/{idCategoria}")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetProductosByCategoria(int idCategoria)
+        {
+            var productos = await _context.Productos
+                .Where(p => p.IdCategoria == idCategoria)
+                .ToListAsync();
+
+            if (productos == null || !productos.Any())
+            {
+                return Ok(new List<Producto>()); // Devolver una lista vacía en lugar de NotFound
+            }
+
+            return Ok(productos);
+        }
 
         // PUT: api/productos/5
         [HttpPut("{id}")]
