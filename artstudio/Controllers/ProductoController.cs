@@ -2,6 +2,9 @@
 using artstudio.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using artstudio.DTOs;
+
 
 namespace artstudio.Controllers
 {
@@ -35,6 +38,16 @@ namespace artstudio.Controllers
             }
 
             return producto;
+        }
+
+        [HttpGet("destacados")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetDestacados()
+        {
+            var destacados = await _context.Productos
+                                           .Where(p => p.Destacado == true)
+                                           .OrderBy(p => p.Posicion)
+                                           .ToListAsync();
+            return destacados;
         }
 
         // POST: api/productos
@@ -73,14 +86,30 @@ namespace artstudio.Controllers
             return Ok(productos);
         }
 
-        // PUT: api/productos/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProducto(int id, Producto producto)
+        public class UpdateProductDto
         {
-            if (id != producto.IdProducto)
+            public int IdProducto { get; set; }
+            public bool? Destacado { get; set; }
+            public int? Posicion { get; set; }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutProducto(int id, UpdateProductDto updateProductDto)
+        {
+            if (id != updateProductDto.IdProducto)
             {
-                return BadRequest();
+                return BadRequest("El ID del producto no coincide.");
             }
+
+            var producto = await _context.Productos.FindAsync(id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            // Solo actualizamos los campos necesarios
+            producto.Destacado = updateProductDto.Destacado ?? producto.Destacado;
+            producto.Posicion = updateProductDto.Posicion ?? producto.Posicion;
 
             _context.Entry(producto).State = EntityState.Modified;
 
@@ -99,9 +128,42 @@ namespace artstudio.Controllers
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Error actualizando el producto: {ex.Message}");
+                return BadRequest("Error actualizando el producto.");
+            }
 
             return NoContent();
         }
+
+
+        [HttpPut("update-positions")]
+        public async Task<IActionResult> UpdateProductPositions([FromBody] List<UpdateProductPositionDto> updateProductPositions)
+        {
+            foreach (var update in updateProductPositions)
+            {
+                var producto = await _context.Productos.FindAsync(update.IdProducto);
+                if (producto != null)
+                {
+                    producto.Posicion = update.Posicion;
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500, "Error actualizando las posiciones");
+            }
+
+            return NoContent();
+        }
+
+
 
         // DELETE: api/productos/5
         [HttpDelete("{id}")]
