@@ -19,9 +19,12 @@ namespace artstudio.Models
         public virtual DbSet<Admin> Admins { get; set; } = null!;
         public virtual DbSet<Banner> Banners { get; set; } = null!;
         public virtual DbSet<Categoria> Categorias { get; set; } = null!;
+        public virtual DbSet<Departamento> Departamentos { get; set; } = null!;
         public virtual DbSet<Efmigrationshistory> Efmigrationshistories { get; set; } = null!;
+        public virtual DbSet<Municipio> Municipios { get; set; } = null!;
         public virtual DbSet<Precio> Precios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
+        public virtual DbSet<Region> Regions { get; set; } = null!;
         public virtual DbSet<Sort> Sorts { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
 
@@ -84,6 +87,28 @@ namespace artstudio.Models
                     .HasColumnName("nombreCategoria");
             });
 
+            modelBuilder.Entity<Departamento>(entity =>
+            {
+                entity.ToTable("departamento");
+
+                entity.HasIndex(e => e.RegionId, "region_id");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CodigoDane).HasColumnName("codigo_dane");
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(255)
+                    .HasColumnName("nombre");
+
+                entity.Property(e => e.RegionId).HasColumnName("region_id");
+
+                entity.HasOne(d => d.Region)
+                    .WithMany(p => p.Departamentos)
+                    .HasForeignKey(d => d.RegionId)
+                    .HasConstraintName("departamento_ibfk_1");
+            });
+
             modelBuilder.Entity<Efmigrationshistory>(entity =>
             {
                 entity.HasKey(e => e.MigrationId)
@@ -94,6 +119,28 @@ namespace artstudio.Models
                 entity.Property(e => e.MigrationId).HasMaxLength(150);
 
                 entity.Property(e => e.ProductVersion).HasMaxLength(32);
+            });
+
+            modelBuilder.Entity<Municipio>(entity =>
+            {
+                entity.ToTable("municipio");
+
+                entity.HasIndex(e => e.DepartamentoId, "departamento_id");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CodigoDane).HasColumnName("codigo_dane");
+
+                entity.Property(e => e.DepartamentoId).HasColumnName("departamento_id");
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(255)
+                    .HasColumnName("nombre");
+
+                entity.HasOne(d => d.Departamento)
+                    .WithMany(p => p.Municipios)
+                    .HasForeignKey(d => d.DepartamentoId)
+                    .HasConstraintName("municipio_ibfk_1");
             });
 
             modelBuilder.Entity<Precio>(entity =>
@@ -158,6 +205,17 @@ namespace artstudio.Models
                     .HasForeignKey(d => d.IdCategoria)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("productos_ibfk_1");
+            });
+
+            modelBuilder.Entity<Region>(entity =>
+            {
+                entity.ToTable("region");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.Nombre)
+                    .HasMaxLength(255)
+                    .HasColumnName("nombre");
             });
 
             modelBuilder.Entity<Sort>(entity =>
