@@ -17,7 +17,8 @@ namespace artstudio.Models
         public int? Posicion { get; set; }
         public bool? Destacado { get; set; }
 
+
         [JsonIgnore]
-        public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
+        public virtual Categoria? IdCategoriaNavigation { get; set; }
     }
 }

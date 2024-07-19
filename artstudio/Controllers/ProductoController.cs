@@ -26,6 +26,18 @@ namespace artstudio.Controllers
             return await _context.Productos.Include(p => p.IdCategoriaNavigation).ToListAsync();
         }
 
+        [HttpGet("ultimos")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetUltimosProductos()
+        {
+            var ultimosProductos = await _context.Productos
+                .OrderByDescending(p => p.IdProducto) // Asumiendo que IdProducto es auto-incremental
+                .Take(9)
+                .Include(p => p.IdCategoriaNavigation)
+                .ToListAsync();
+
+            return Ok(ultimosProductos);
+        }
+
         // GET: api/productos/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Producto>> GetProducto(int id)
