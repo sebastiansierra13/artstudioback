@@ -24,7 +24,9 @@ builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
                                                     .WithOrigins("http://localhost:4200")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()));
-
+// Program.cs
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 var app = builder.Build();
 app.UseCors("AllowAngularOrigins");
 
@@ -37,7 +39,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
-
 
 app.UseAuthorization();
 
