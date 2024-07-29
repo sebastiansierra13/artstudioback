@@ -18,6 +18,6 @@ namespace artstudio.Models
 
 
         [JsonIgnore]
-        public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
+        public virtual Categoria? IdCategoriaNavigation { get; set; }
     }
 }

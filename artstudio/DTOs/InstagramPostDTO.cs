@@ -6,5 +6,6 @@ namespace artstudio.DTOs
         public string? ImageUrl { get; set; }
         public string Caption { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
+        public string PostUrl { get; set; } = null!; // Nueva propiedad
     }
 }

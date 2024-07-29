@@ -27,12 +27,12 @@ builder.Services.AddDbContext<MiDbContext>(options =>
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
-builder.Services.AddCors(options =>
-    options.AddPolicy("AllowAngularOrigins",
-        builder => builder
-            .WithOrigins("http://localhost:4200")
-            .AllowAnyHeader()
-            .AllowAnyMethod()));
+
+builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
+                                    builder => builder.AllowAnyOrigin()
+                                                    .WithOrigins("http://localhost:4200")
+                                                    .AllowAnyHeader()
+                                                    .AllowAnyMethod()));
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IInstagramService, InstagramService>();

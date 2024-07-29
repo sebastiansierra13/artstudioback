@@ -39,7 +39,7 @@ namespace artstudio.Services
 
             try
             {
-                var response = await _httpClient.GetAsync($"https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,timestamp,children{{media_type,media_url}}&access_token={token.AccessToken}");
+                var response = await _httpClient.GetAsync($"https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,timestamp,permalink,children{{media_type,media_url}}&access_token={token.AccessToken}");
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
@@ -58,10 +58,11 @@ namespace artstudio.Services
                         Id = p.id,
                         ImageUrl = p.media_type == "IMAGE" ? p.media_url : p.children?.Data?.FirstOrDefault(c => c.media_type == "IMAGE")?.media_url,
                         Caption = p.caption,
-                        CreatedAt = DateTime.Parse(p.timestamp)
+                        CreatedAt = DateTime.Parse(p.timestamp),
+                        PostUrl = p.permalink // Usar el enlace proporcionado por la API
                     })
                     .Where(p => p.ImageUrl != null)
-                    .Take(5)
+                    .Take(10)
                     .ToList();
 
                 Console.WriteLine($"Número de posts procesados: {posts.Count}");
@@ -78,6 +79,8 @@ namespace artstudio.Services
                 throw new Exception("Error al procesar la respuesta de la API de Instagram.", ex);
             }
         }
+
+
     }
 
     public class InstagramApiResponse
@@ -92,6 +95,7 @@ namespace artstudio.Services
         public string media_type { get; set; } = null!;
         public string media_url { get; set; } = null!;
         public string timestamp { get; set; } = null!;
+        public string permalink { get; set; } = null!; // Nueva propiedad
         public InstagramChildrenResponse? children { get; set; }
     }
 
