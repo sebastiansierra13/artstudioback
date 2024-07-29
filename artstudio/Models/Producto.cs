@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-
 namespace artstudio.Models
 {
     public partial class Producto
@@ -19,6 +18,6 @@ namespace artstudio.Models
 
 
         [JsonIgnore]
-        public virtual Categoria? IdCategoriaNavigation { get; set; }
+        public virtual Categoria IdCategoriaNavigation { get; set; } = null!;
     }
 }

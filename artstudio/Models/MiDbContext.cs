@@ -21,12 +21,14 @@ namespace artstudio.Models
         public virtual DbSet<Categoria> Categorias { get; set; } = null!;
         public virtual DbSet<Departamento> Departamentos { get; set; } = null!;
         public virtual DbSet<Efmigrationshistory> Efmigrationshistories { get; set; } = null!;
+        public virtual DbSet<Instagramtoken> Instagramtokens { get; set; } = null!;
         public virtual DbSet<Municipio> Municipios { get; set; } = null!;
         public virtual DbSet<Precio> Precios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
         public virtual DbSet<Region> Regions { get; set; } = null!;
         public virtual DbSet<Sort> Sorts { get; set; } = null!;
         public virtual DbSet<Tag> Tags { get; set; } = null!;
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -120,6 +122,21 @@ namespace artstudio.Models
 
                 entity.Property(e => e.ProductVersion).HasMaxLength(32);
             });
+
+            modelBuilder.Entity<Instagramtoken>(entity =>
+            {
+                entity.ToTable("instagramtokens");
+
+                entity.Property(e => e.AccessToken).HasMaxLength(255);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("timestamp")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
+            });
+
+
 
             modelBuilder.Entity<Municipio>(entity =>
             {
@@ -252,6 +269,8 @@ namespace artstudio.Models
 
             OnModelCreatingPartial(modelBuilder);
         }
+
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
