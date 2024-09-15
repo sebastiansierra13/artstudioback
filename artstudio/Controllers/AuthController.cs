@@ -28,9 +28,9 @@ namespace artstudio.Controllers
                     var cookieOptions = new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false, // Cambiar a true en producción con HTTPS
+                        Secure = true, // Cambiar a true en producción con HTTPS
                         Expires = DateTime.Now.AddHours(1),
-                        SameSite = SameSiteMode.None // Permitir cookies entre orígenes
+                        SameSite = SameSiteMode.Lax // Permitir cookies entre orígenes
                     };
 
                     Response.Cookies.Append("admin_session", "true", cookieOptions);
