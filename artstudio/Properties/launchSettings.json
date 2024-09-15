@@ -19,7 +19,6 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
@@ -27,18 +26,14 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-    }
-  },
-  {
-    "profiles": {
-      "artstudio": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": false,
-        "applicationUrl": "http://34.44.154.211:7055",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Production"
-        }
+    },
+    "artstudio-production": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:7055",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
       }
     }
   }
