@@ -7,5 +7,6 @@ namespace artstudio.Models
     {
         public string User { get; set; } = null!;
         public string Password { get; set; } = null!;
+        public int Id { get; set; }
     }
 }

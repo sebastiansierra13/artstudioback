@@ -10,19 +10,19 @@ namespace artstudio.Controllers
     {
         private readonly MiDbContext _context;
 
-        public BannerController (MiDbContext context)
+        public BannerController(MiDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Banner
+        // GET: api/banner
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Banner>>> GetBanner()
+        public async Task<ActionResult<IEnumerable<Banner>>> GetBanners()
         {
-            return await _context.Banners.ToListAsync();
+            return await _context.Banners.OrderBy(b => b.Posicion).ToListAsync();
         }
 
-        // GET: api/Banner/5
+        // GET: api/banner/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Banner>> GetBanner(int id)
         {
@@ -38,61 +38,91 @@ namespace artstudio.Controllers
 
         // POST: api/banner
         [HttpPost]
-        public async Task<ActionResult<Banner>> PostTag(Banner banner)
+        public async Task<ActionResult<Banner>> PostBanner(Banner banner)
         {
+            // Asigna una posición si no se proporciona
+            if (banner.Posicion == null)
+            {
+                var lastBanner = await _context.Banners.OrderByDescending(b => b.Posicion).FirstOrDefaultAsync();
+                banner.Posicion = (lastBanner?.Posicion ?? 0) + 1;
+            }
+
             _context.Banners.Add(banner);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetBanner), new { id = banner.Id },banner);
+            return CreatedAtAction(nameof(GetBanner), new { id = banner.Id }, banner);
         }
 
         [HttpPost("bulk")]
-        public async Task<ActionResult<IEnumerable<Banner>>> PostBulkBanners(IEnumerable<string> urls)
+        public async Task<ActionResult<IEnumerable<Banner>>> PostBulkBanners([FromBody] List<Banner> banners)
         {
-            if (urls == null || !urls.Any())
+            if (banners == null || !banners.Any())
             {
-                return BadRequest("No URLs provided.");
+                return BadRequest("No banners provided.");
             }
 
-            List<Banner> bannersToAdd = new List<Banner>();
+            var lastPosition = await _context.Banners.MaxAsync(b => b.Posicion) ?? 0;
 
-            foreach (var url in urls)
+            foreach (var banner in banners)
             {
-                // Crear un nuevo objeto Banner con la URL proporcionada
-                Banner banner = new Banner
+                if (banner.Posicion == null)
                 {
-                    Url = url
-                };
-
-                bannersToAdd.Add(banner);
+                    banner.Posicion = ++lastPosition;
+                }
+                _context.Banners.Add(banner);
             }
 
-            // Agregar todos los banners a la base de datos y guardar cambios
-            _context.Banners.AddRange(bannersToAdd);
             await _context.SaveChangesAsync();
 
-            // Retornar un ActionResult con todos los banners agregados
-            return CreatedAtAction(nameof(GetBulkBanners), bannersToAdd);
+            return CreatedAtAction(nameof(GetBanners), banners);
         }
 
-        // Otro método para obtener los banners (ejemplo)
-        [HttpGet("bulk")]
-        public async Task<ActionResult<IEnumerable<Banner>>> GetBulkBanners()
-        {
-            return await _context.Banners.ToListAsync();
-        }
-    
 
-    // PUT: api/tags/5
-    [HttpPut("{id}")]
-        public async Task<IActionResult> PutTag(int id, Tag tag)
+
+
+        [HttpPut("positions")]
+        public async Task<IActionResult> UpdatePositions([FromBody] List<Banner> updates)
         {
-            if (id != tag.IdTag)
+            if (updates == null || !updates.Any())
+            {
+                return BadRequest("No se proporcionaron actualizaciones de posición.");
+            }
+
+            try
+            {
+                foreach (var update in updates)
+                {
+                    var banner = await _context.Banners.FindAsync(update.Id);
+                    if (banner != null)
+                    {
+                        banner.Posicion = update.Posicion;
+                        _context.Entry(banner).State = EntityState.Modified;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Devuelve un mensaje claro de éxito
+                return Ok(new { message = "Posiciones actualizadas exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, new { message = "Ocurrió un error al actualizar las posiciones de los banners." });
+            }
+        }
+
+
+        // PUT: api/banner/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutBanner(int id, Banner banner)
+        {
+            if (id != banner.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(tag).State = EntityState.Modified;
+            _context.Entry(banner).State = EntityState.Modified;
 
             try
             {
@@ -100,7 +130,7 @@ namespace artstudio.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BannerExist(id))
+                if (!BannerExists(id))
                 {
                     return NotFound();
                 }
@@ -129,7 +159,7 @@ namespace artstudio.Controllers
             return NoContent();
         }
 
-        private bool BannerExist(int id)
+        private bool BannerExists(int id)
         {
             return _context.Banners.Any(e => e.Id == id);
         }

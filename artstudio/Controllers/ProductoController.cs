@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using artstudio.DTOs;
+using artstudio.Services;
 
 
 namespace artstudio.Controllers
@@ -13,10 +14,11 @@ namespace artstudio.Controllers
     public class ProductoController : ControllerBase
     {
         private readonly MiDbContext _context;
-
-        public ProductoController(MiDbContext context)
+        private readonly ProductService _productService;
+        public ProductoController(MiDbContext context, ProductService productService)
         {
             _context = context;
+            _productService = productService;
         }
 
         // GET: api/productos
@@ -61,6 +63,19 @@ namespace artstudio.Controllers
                                            .ToListAsync();
             return destacados;
         }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<Producto>>> Search(string query)
+        {
+            if (string.IsNullOrEmpty(query))
+            {
+                return BadRequest("La consulta de búsqueda no puede estar vacía.");
+            }
+
+            var results = await _productService.SearchProductsAsync(query);
+            return Ok(results);
+        }
+
 
         // POST: api/productos
         [HttpPost]
@@ -175,6 +190,70 @@ namespace artstudio.Controllers
             return NoContent();
         }
 
+        [HttpGet("{id}/relacionados")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetProductosRelacionados(int id)
+        {
+            try
+            {
+                // Obtener el producto actual
+                var producto = await _context.Productos
+                    .FirstOrDefaultAsync(p => p.IdProducto == id);
+
+                if (producto == null)
+                {
+                    Console.WriteLine($"Producto con ID {id} no encontrado.");
+                    return NotFound($"No se encontró el producto con ID {id}");
+                }
+
+                Console.WriteLine($"Producto encontrado: ID {producto.IdProducto}, Nombre: {producto.NombreProducto}");
+
+                // Obtener los IDs de los tags del producto actual
+                var tagIds = new List<int>();
+                if (!string.IsNullOrEmpty(producto.ListTags))
+                {
+                    tagIds = producto.ListTags.Split(',')
+                                              .Select(s => int.TryParse(s.Trim(), out var result) ? result : (int?)null)
+                                              .Where(i => i.HasValue)
+                                              .Select(i => i.Value)
+                                              .ToList();
+                }
+
+                Console.WriteLine($"Tags del producto: {string.Join(", ", tagIds)}");
+
+                if (!tagIds.Any())
+                {
+                    Console.WriteLine("El producto no tiene tags asociados.");
+                    return Ok(new List<Producto>());
+                }
+
+                // Buscar productos relacionados (que no sean el producto actual)
+                var productosRelacionados = await _context.Productos
+                    .ToListAsync(); // Obtén todos los productos primero
+
+                var productosRelacionadosFiltrados = productosRelacionados
+                    .Where(p => p.IdProducto != id &&
+                                tagIds.Any(t => !string.IsNullOrEmpty(p.ListTags) && p.ListTags.Split(',').Contains(t.ToString())))
+                    .ToList();
+
+                Console.WriteLine($"Productos relacionados encontrados: {productosRelacionadosFiltrados.Count}");
+
+                // Imprimir detalles de los productos relacionados
+                foreach (var prod in productosRelacionadosFiltrados)
+                {
+                    Console.WriteLine($"Producto relacionado: ID {prod.IdProducto}, Nombre: {prod.NombreProducto}");
+                    Console.WriteLine($"Tags: {prod.ListTags}");
+                }
+
+                return Ok(productosRelacionadosFiltrados);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en GetProductosRelacionados: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                return StatusCode(500, "Ocurrió un error interno del servidor. Por favor, revisa los logs para más detalles.");
+            }
+        }
+
 
 
         // DELETE: api/productos/5
@@ -198,4 +277,7 @@ namespace artstudio.Controllers
             return _context.Productos.Any(e => e.IdProducto == id);
         }
     }
+
+
+
 }

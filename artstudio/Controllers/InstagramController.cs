@@ -5,31 +5,30 @@ using Microsoft.EntityFrameworkCore;
 using artstudio.Services;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
-using Microsoft.Extensions.Configuration;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Configuration;
-using System.Threading.Tasks;
-using System.Net.Http; 
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-
+using artstudio.Configuration;
 
 namespace artstudio.Controllers
 {
-
-
     [ApiController]
     [Route("instagram")]
     public class InstagramController : ControllerBase
     {
         private readonly IInstagramService _instagramService;
-        private readonly IConfiguration _configuration;
+        private readonly InstagramSettings _instagramSettings;
         private readonly HttpClient _httpClient;
         private readonly MiDbContext _context;
 
-        public InstagramController(IInstagramService instagramService, IConfiguration configuration, HttpClient httpClient, MiDbContext context)
+        public InstagramController(
+            IInstagramService instagramService,
+            IOptions<InstagramSettings> instagramSettings,
+            HttpClient httpClient,
+            MiDbContext context)
         {
             _instagramService = instagramService;
+            _instagramSettings = instagramSettings.Value;
+            _httpClient = httpClient;
             _context = context;
         }
 
@@ -50,27 +49,18 @@ namespace artstudio.Controllers
             }
         }
 
-
-
-        // Endpoint para la solicitud de eliminación de datos
         [HttpPost("delete-data")]
         public IActionResult DeleteData([FromBody] DeleteDataRequest request)
         {
-            // Simplemente devuelve un mensaje indicando que no se almacenan datos personales
             return Ok(new { status = "No se almacenan datos personales de los usuarios." });
         }
-
-
 
         [HttpGet("auth")]
         public IActionResult Authenticate()
         {
-            var clientId = _configuration["Instagram:ClientId"];
-            var redirectUri = _configuration["Instagram:RedirectUri"];
-            var authUrl = $"https://api.instagram.com/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=user_profile,user_media&response_type=code";
+            var authUrl = $"https://api.instagram.com/oauth/authorize?client_id={_instagramSettings.ClientId}&scope=user_profile,user_media&response_type=code";
             return Redirect(authUrl);
         }
-
 
         [HttpPost("store-token")]
         public async Task<IActionResult> StoreToken([FromBody] string accessToken)
@@ -79,7 +69,7 @@ namespace artstudio.Controllers
             {
                 AccessToken = accessToken,
                 CreatedAt = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddDays(60) // Suponiendo que el token expira en 60 días
+                ExpiryDate = DateTime.UtcNow.AddDays(60)
             };
 
             _context.Instagramtokens.Add(token);
@@ -88,22 +78,15 @@ namespace artstudio.Controllers
             return Ok("Token almacenado exitosamente.");
         }
 
-
-
         [HttpGet("callback")]
         public async Task<IActionResult> Callback(string code)
         {
-            var clientId = _configuration["Instagram:ClientId"];
-            var clientSecret = _configuration["Instagram:ClientSecret"];
-            var redirectUri = _configuration["Instagram:RedirectUri"];
-
             var requestUrl = "https://api.instagram.com/oauth/access_token";
             var content = new FormUrlEncodedContent(new[]
             {
-                new KeyValuePair<string, string>("client_id", clientId),
-                new KeyValuePair<string, string>("client_secret", clientSecret),
+                new KeyValuePair<string, string>("client_id", _instagramSettings.ClientId),
+                new KeyValuePair<string, string>("client_secret", _instagramSettings.ClientSecret),
                 new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("redirect_uri", redirectUri),
                 new KeyValuePair<string, string>("code", code)
             });
 
@@ -112,8 +95,8 @@ namespace artstudio.Controllers
             var responseJson = JObject.Parse(responseString);
             var accessToken = responseJson["access_token"]?.ToString();
 
-            // Save accessToken securely, e.g., in a database or a secure storage
-            // ...
+            // Aquí podrías llamar a StoreToken para guardar el token
+            // await StoreToken(accessToken);
 
             return Ok("Authentication successful, access token received.");
         }
