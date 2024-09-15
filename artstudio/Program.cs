@@ -32,7 +32,7 @@ builder.Configuration.AddJsonFile("appsettings.json");
 
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
                                     builder => builder.AllowAnyOrigin()
-                                                    .WithOrigins("http://localhost:4200")
+                                                    .WithOrigins("https://artstudio.com.co")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
                                                     .AllowCredentials())); // Permite el uso de cookies));
