@@ -31,7 +31,7 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:7055",
+      "applicationUrl": "http://api.artstudio.com.co:7055",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production"
       }
