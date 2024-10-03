@@ -38,8 +38,6 @@ namespace artstudio.Controllers
             try
             {
                 var posts = await _instagramService.GetLatestPostsAsync();
-                Console.WriteLine($"Número de posts recuperados: {posts.Count}");
-                Console.WriteLine($"Primer post: {JsonConvert.SerializeObject(posts.FirstOrDefault())}");
                 return Ok(posts);
             }
             catch (Exception ex)

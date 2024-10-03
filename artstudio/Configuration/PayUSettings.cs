@@ -11,7 +11,8 @@ namespace artstudio.Configuration
         public string ResponseUrl { get; set; } = null!;
         public string ConfirmationUrl { get; set; } = null!;
         public bool TestMode { get; set; }
-        public string SandboxUrl { get; set; } = null!; // URL del entorno de pruebas
-        public string ProductionUrl { get; set; } = null!; // URL del entorno de producción
+        public string SandboxUrl { get; set; } = null!;
+        public string ProductionUrl { get; set; } = null!;
+
     }
 }

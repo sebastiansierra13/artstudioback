@@ -25,6 +25,8 @@ namespace artstudio.Models
         public virtual DbSet<Instagramtoken> Instagramtokens { get; set; } = null!;
         public virtual DbSet<Municipio> Municipios { get; set; } = null!;
         public virtual DbSet<Order> Orders { get; set; } = null!;
+        public virtual DbSet<Orderproduct> Orderproducts { get; set; } = null!;
+        public virtual DbSet<Ordersunused> Ordersunuseds { get; set; } = null!;
         public virtual DbSet<Paymenttransaction> Paymenttransactions { get; set; } = null!;
         public virtual DbSet<Precio> Precios { get; set; } = null!;
         public virtual DbSet<Producto> Productos { get; set; } = null!;
@@ -176,7 +178,61 @@ namespace artstudio.Models
 
             modelBuilder.Entity<Order>(entity =>
             {
-                entity.ToTable("orders");
+                entity.ToTable("order");
+
+                entity.Property(e => e.BuyerEmail).HasMaxLength(255);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.Property(e => e.Currency)
+                    .HasMaxLength(10)
+                    .HasDefaultValueSql("'COP'");
+
+                entity.Property(e => e.OrderStatus)
+                    .HasMaxLength(50)
+                    .HasDefaultValueSql("'Pending'");
+
+                entity.Property(e => e.ReferenceCode).HasMaxLength(255);
+
+                entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasColumnType("datetime")
+                    .ValueGeneratedOnAddOrUpdate();
+            });
+
+            modelBuilder.Entity<Orderproduct>(entity =>
+            {
+                entity.ToTable("orderproduct");
+
+                entity.HasIndex(e => e.OrderId, "OrderId");
+
+                entity.Property(e => e.PrecioMarco).HasPrecision(10, 2);
+
+                entity.Property(e => e.PrecioPoster).HasPrecision(10, 2);
+
+                entity.Property(e => e.ProductImageUrl).HasMaxLength(255);
+
+                entity.Property(e => e.ProductName).HasMaxLength(255);
+
+                entity.Property(e => e.Subtotal).HasPrecision(10, 2);
+
+                entity.Property(e => e.TamanhoPoster).HasMaxLength(100);
+
+                entity.HasOne(d => d.Order)
+                    .WithMany(p => p.Orderproducts)
+                    .HasForeignKey(d => d.OrderId)
+                    .HasConstraintName("orderproduct_ibfk_1");
+            });
+
+            modelBuilder.Entity<Ordersunused>(entity =>
+            {
+                entity.HasKey(e => e.OrderId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("ordersunused");
 
                 entity.Property(e => e.OrderId).ValueGeneratedNever();
 

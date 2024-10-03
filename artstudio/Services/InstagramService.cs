@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using artstudio.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using artstudio.DTOs;
+using artstudio.DTOs; // Asegúrate de tener esta directiva
+using artstudio.Configuration;
+using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 
 namespace artstudio.Services
 {
@@ -19,11 +22,14 @@ namespace artstudio.Services
     {
         private readonly HttpClient _httpClient;
         private readonly MiDbContext _context;
+        private readonly InstagramSettings _instagramSettings;
 
-        public InstagramService(HttpClient httpClient, MiDbContext context)
+        // Cambia el constructor para recibir IOptions<InstagramSettings>
+        public InstagramService(HttpClient httpClient, MiDbContext context, IOptions<InstagramSettings> instagramSettings)
         {
             _httpClient = httpClient;
             _context = context;
+            _instagramSettings = instagramSettings.Value;  // Obtiene el valor real de IOptions
         }
 
         public async Task<List<InstagramPostDTO>> GetLatestPostsAsync()
@@ -32,9 +38,16 @@ namespace artstudio.Services
                 .OrderByDescending(t => t.CreatedAt)
                 .FirstOrDefaultAsync();
 
-            if (token == null || token.ExpiryDate <= DateTime.UtcNow)
+            if (token == null)
             {
-                throw new Exception("Token de acceso inválido o expirado.");
+                throw new Exception("No se encontró un token de acceso.");
+            }
+
+            // Verificar si el token ha expirado o está por expirar en las próximas 24 horas
+            if (token.ExpiryDate <= DateTime.UtcNow || (token.ExpiryDate - DateTime.UtcNow).TotalHours < 24)
+            {
+                // Intentar actualizar el token
+                token = await RefreshAccessTokenAsync(token);
             }
 
             try
@@ -43,7 +56,6 @@ namespace artstudio.Services
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                Console.WriteLine("Contenido de la respuesta: " + content);
 
                 var result = JsonConvert.DeserializeObject<InstagramApiResponse>(content);
                 if (result == null || result.Data == null || !result.Data.Any())
@@ -59,13 +71,12 @@ namespace artstudio.Services
                         ImageUrl = p.media_type == "IMAGE" ? p.media_url : p.children?.Data?.FirstOrDefault(c => c.media_type == "IMAGE")?.media_url,
                         Caption = p.caption,
                         CreatedAt = DateTime.Parse(p.timestamp),
-                        PostUrl = p.permalink // Usar el enlace proporcionado por la API
+                        PostUrl = p.permalink
                     })
                     .Where(p => p.ImageUrl != null)
                     .Take(10)
                     .ToList();
 
-                Console.WriteLine($"Número de posts procesados: {posts.Count}");
                 return posts;
             }
             catch (HttpRequestException ex)
@@ -80,34 +91,36 @@ namespace artstudio.Services
             }
         }
 
+        private async Task<Instagramtoken> RefreshAccessTokenAsync(Instagramtoken currentToken)
+        {
+            var requestUrl = $"https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token={currentToken.AccessToken}";
 
+            var response = await _httpClient.GetAsync(requestUrl);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception("Error al actualizar el token de acceso.");
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var responseJson = JsonConvert.DeserializeObject<JObject>(content);
+            var newAccessToken = responseJson["access_token"]?.ToString();
+            var expiresInSeconds = responseJson["expires_in"]?.ToObject<int>() ?? 5184000; // Por defecto 60 días
+
+            if (string.IsNullOrEmpty(newAccessToken))
+            {
+                throw new Exception("Error al obtener un nuevo token de acceso.");
+            }
+
+            // Actualizar el token existente con los nuevos valores
+            currentToken.AccessToken = newAccessToken;
+            currentToken.ExpiryDate = DateTime.UtcNow.AddSeconds(expiresInSeconds);
+            currentToken.CreatedAt = DateTime.UtcNow;
+
+            // Guardar el token actualizado en la base de datos
+            _context.Instagramtokens.Update(currentToken);
+            await _context.SaveChangesAsync();
+
+            return currentToken;
+        }
     }
-
-    public class InstagramApiResponse
-    {
-        public List<InstagramPost> Data { get; set; } = new List<InstagramPost>();
-    }
-
-    public class InstagramPost
-    {
-        public string id { get; set; } = null!;
-        public string caption { get; set; } = null!;
-        public string media_type { get; set; } = null!;
-        public string media_url { get; set; } = null!;
-        public string timestamp { get; set; } = null!;
-        public string permalink { get; set; } = null!; // Nueva propiedad
-        public InstagramChildrenResponse? children { get; set; }
-    }
-
-    public class InstagramChildrenResponse
-    {
-        public List<InstagramChild> Data { get; set; } = new List<InstagramChild>();
-    }
-
-    public class InstagramChild
-    {
-        public string media_type { get; set; } = null!;
-        public string media_url { get; set; } = null!;
-    }
-
 }

@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -28,5 +27,3 @@ namespace artstudio.Models
         public virtual ICollection<Tag> IdTags { get; set; }
     }
 }
-
-

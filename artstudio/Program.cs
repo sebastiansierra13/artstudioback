@@ -3,6 +3,7 @@ using artstudio.Models;
 using artstudio.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.X509;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +33,7 @@ builder.Configuration.AddJsonFile("appsettings.json");
 
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
                                     builder => builder.AllowAnyOrigin()
-                                                    .WithOrigins("https://artstudio.com.co")
+                                                    .WithOrigins("http://localhost:4200")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
                                                     .AllowCredentials())); // Permite el uso de cookies));
@@ -41,26 +42,37 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IInstagramService, InstagramService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
 // Configuración de PayU desde variables de entorno
-builder.Services.Configure<PayUSettings>(options =>
+try
 {
-    options.MerchantId = Environment.GetEnvironmentVariable("PayU_MerchantId") ?? throw new ArgumentNullException("PayU_MerchantId");
-    options.AccountId = Environment.GetEnvironmentVariable("PayU_AccountId") ?? throw new ArgumentNullException("PayU_AccountId");
-    options.ApiKey = Environment.GetEnvironmentVariable("PayU_ApiKey") ?? throw new ArgumentNullException("PayU_ApiKey");
-    options.ResponseUrl = Environment.GetEnvironmentVariable("PayU_ResponseUrl") ?? throw new ArgumentNullException("PayU_ResponseUrl");
-    options.ConfirmationUrl = Environment.GetEnvironmentVariable("PayU_ConfirmationUrl") ?? throw new ArgumentNullException("PayU_ConfirmationUrl");
-    options.TestMode = Environment.GetEnvironmentVariable("PayU_TestMode") == "1"; // true si está en modo sandbox
+    builder.Services.Configure<PayUSettings>(options =>
+    {
+        options.MerchantId = Environment.GetEnvironmentVariable("PayU_MerchantId");
+        options.AccountId = Environment.GetEnvironmentVariable("PayU_AccountId");
+        options.ApiKey = Environment.GetEnvironmentVariable("PayU_ApiKey");
+        options.ResponseUrl = Environment.GetEnvironmentVariable("PayU_ResponseUrl") ;
+        options.ConfirmationUrl = Environment.GetEnvironmentVariable("PayU_ConfirmationUrl");
+        // Convertir el valor de la variable de entorno "PayU_TestMode" en booleano
+        var testMode = Environment.GetEnvironmentVariable("PayU_TestMode");
+        options.TestMode = !string.IsNullOrEmpty(testMode) && testMode == "1";  // Si es "1", lo asigna como true, de lo contrario false
+        options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl") ?? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
+        options.ProductionUrl = Environment.GetEnvironmentVariable("PayU_ProductionUrl") ?? "https://checkout.payulatam.com/ppp-web-gateway-payu/";
+    });
 
-    // URLs de sandbox y producción
-    options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl") ?? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
-    options.ProductionUrl = Environment.GetEnvironmentVariable("PayU_ProductionUrl") ?? "https://checkout.payulatam.com/ppp-web-gateway-payu/";
-});
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}
+
+
 
 // Configuración de Instagram desde variables de entorno
 builder.Services.Configure<InstagramSettings>(options =>
 {
-    options.ClientId = Environment.GetEnvironmentVariable("Instagram_ClientId");
-    options.ClientSecret = Environment.GetEnvironmentVariable("Instagram_ClientSecret");
+    options.ClientId = Environment.GetEnvironmentVariable("Instagram_ClientId") ?? "790062323292797";
+    options.ClientSecret = Environment.GetEnvironmentVariable("Instagram_ClientSecret") ?? "2d55fca19782ec6f9f77e5d48b34b943";
 });
+
 
 
 
