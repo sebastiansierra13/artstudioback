@@ -112,6 +112,11 @@ namespace artstudio.Services
             formData.MerchantLogo = "https://firebasestorage.googleapis.com/v0/b/fireartstudio-8586e.appspot.com/o/images%2Flogo%2FlogoArtStudioO.png?alt=media&token=f4d3707b-88fe-4e82-8a11-7aef0a7bcc0e";
             formData.Extra1 = formData.Apartment; //
             formData.Extra2 = formData.OrderNotes; // 
+
+            // Determinar si estamos en modo producción o sandbox según las variables de entorno
+            formData.PayUUrl = _payUSettings.TestMode ? _payUSettings.SandboxUrl : _payUSettings.ProductionUrl;
+
+
             // Generar la firma (Signature) de forma segura en el backend
             formData.Signature = GenerateSignature(formData);
 

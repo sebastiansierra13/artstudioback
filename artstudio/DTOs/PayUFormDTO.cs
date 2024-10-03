@@ -40,5 +40,8 @@ namespace artstudio.DTOs
         public string? MerchantLogo { get; set; } // Logo del comercio
         public string? Extra1 { get; set; }   // 
         public string? Extra2 { get; set; }   // 
+        // Nuevo campo para la URL de PayU (sandbox o producción)
+        public string? PayUUrl { get; set; }   // URL de PayU que se enviará al frontend
+
     }
 }
