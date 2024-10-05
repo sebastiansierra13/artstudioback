@@ -115,6 +115,7 @@ namespace artstudio.Services
 
             // Determinar si estamos en modo producción o sandbox según las variables de entorno
             formData.PayUUrl = _payUSettings.TestMode ? _payUSettings.SandboxUrl : _payUSettings.ProductionUrl;
+            
 
 
             // Generar la firma (Signature) de forma segura en el backend
