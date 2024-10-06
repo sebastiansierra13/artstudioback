@@ -10,7 +10,7 @@ namespace artstudio.Configuration
         public string ApiKey { get; set; } = null!;
         public string ResponseUrl { get; set; } = null!;
         public string ConfirmationUrl { get; set; } = null!;
-        public bool TestMode { get; set; } = false;
+        public bool TestMode { get; set; } = true;
         public string SandboxUrl { get; set; } = null!;
         public string ProductionUrl { get; set; } = null!;
 
