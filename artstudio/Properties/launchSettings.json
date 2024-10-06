@@ -24,7 +24,7 @@
         "ASPNETCORE_ENVIRONMENT": "Production"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://api.artstudio.com.co:7055"
+      "applicationUrl": "https://api.artstudio.com.co"
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",
