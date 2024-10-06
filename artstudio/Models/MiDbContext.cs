@@ -180,7 +180,13 @@ namespace artstudio.Models
             {
                 entity.ToTable("order");
 
+                entity.Property(e => e.Apartment).HasMaxLength(255);
+
                 entity.Property(e => e.BuyerEmail).HasMaxLength(255);
+
+                entity.Property(e => e.BuyerFullName).HasMaxLength(255);
+
+                entity.Property(e => e.City).HasMaxLength(255);
 
                 entity.Property(e => e.CreatedAt)
                     .HasColumnType("datetime")
@@ -190,17 +196,32 @@ namespace artstudio.Models
                     .HasMaxLength(10)
                     .HasDefaultValueSql("'COP'");
 
+                entity.Property(e => e.Department).HasMaxLength(255);
+
+                entity.Property(e => e.Extra1).HasMaxLength(255);
+
+                entity.Property(e => e.Extra2).HasMaxLength(255);
+
+                entity.Property(e => e.MobilePhone).HasMaxLength(20);
+
+                entity.Property(e => e.Neighborhood).HasMaxLength(255);
+
                 entity.Property(e => e.OrderStatus)
                     .HasMaxLength(50)
                     .HasDefaultValueSql("'Pending'");
 
+                entity.Property(e => e.Postcode).HasMaxLength(20);
+
                 entity.Property(e => e.ReferenceCode).HasMaxLength(255);
+
+                entity.Property(e => e.StreetName).HasMaxLength(255);
 
                 entity.Property(e => e.TotalAmount).HasPrecision(10, 2);
 
                 entity.Property(e => e.UpdatedAt)
-                    .HasColumnType("datetime")
-                    .ValueGeneratedOnAddOrUpdate();
+                    .HasColumnType("timestamp")
+                    .ValueGeneratedOnAddOrUpdate()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
             });
 
             modelBuilder.Entity<Orderproduct>(entity =>

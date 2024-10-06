@@ -79,6 +79,7 @@ namespace artstudio.Controllers
                     return NotFound("No se encontró la orden.");
                 }
 
+
                 // Actualizar el estado de la transacción en la base de datos
                 order.OrderStatus = GetTransactionStateMessage(confirmation.State_pol);
                 order.UpdatedAt = DateTime.Now;
@@ -88,7 +89,7 @@ namespace artstudio.Controllers
                 // Si la transacción fue aprobada, enviar correo al vendedor
                 if (confirmation.State_pol == "4") // Estado 4 = Aprobado
                 {
-                    SendOrderConfirmationEmail(order);
+                    SendOrderConfirmationEmail(order); // Enviar el PayUFormDTO junto con la orden
                 }
 
                 return Ok("Confirmación recibida exitosamente.");
@@ -99,6 +100,7 @@ namespace artstudio.Controllers
                 return StatusCode(500, "Error en el procesamiento de la confirmación.");
             }
         }
+
 
 
 
@@ -114,6 +116,16 @@ namespace artstudio.Controllers
                 var newOrder = new Order
                 {
                     BuyerEmail = payUFormDTO.BuyerEmail,
+                    BuyerFullName = $"{payUFormDTO.FirstName} {payUFormDTO.LastName}", // Nombre completo del comprador
+                    MobilePhone = payUFormDTO.Phone, // Teléfono del comprador
+                    StreetName = payUFormDTO.StreetName, // Dirección del comprador
+                    Apartment = payUFormDTO.Apartment, // Detalles adicionales como apartamento
+                    Neighborhood = payUFormDTO.Neighborhood, // Barrio del comprador
+                    City = payUFormDTO.City, // Ciudad del comprador
+                    Department = payUFormDTO.Department, // Departamento del comprador
+                    Postcode = payUFormDTO.Postcode, // Código postal (opcional)
+                    Extra1 = payUFormDTO.Extra1, // Extra1 del formulario
+                    Extra2 = payUFormDTO.Extra2, // Extra2 del formulario
                     TotalAmount = payUFormDTO.Total,
                     Currency = "COP", // Moneda predeterminada desde el backend
                     OrderStatus = "Pending",  // Estado inicial del pedido
@@ -148,7 +160,7 @@ namespace artstudio.Controllers
 
                 // Enviar respuesta de éxito
                 return Ok(new { orderId = newOrder.OrderId, referenceCode = newOrder.ReferenceCode });
-               
+
             }
             catch (Exception ex)
             {
@@ -156,6 +168,7 @@ namespace artstudio.Controllers
                 return StatusCode(500, "Error al crear la orden.");
             }
         }
+
 
 
 
@@ -299,28 +312,77 @@ namespace artstudio.Controllers
                 var toAddress = new MailAddress("artstudiomg2024@gmail.com"); // Correo de la tienda o destinatario
                 string fromPassword = "fwjzycoliosyjgux";
 
-                // Aquí corregimos 'const' a 'string' porque 'order.ReferenceCode' es una variable
                 string subject = $"Nuevo Pedido Aprobado: {order.ReferenceCode}";
 
-                // Crear el cuerpo del correo
+                // Crear el cuerpo del correo con datos ordenados en una tabla
                 var body = new StringBuilder();
-                body.AppendLine("<h2>Detalles del Pedido</h2>");
-                body.AppendLine($"<p><strong>Referencia:</strong> {order.ReferenceCode}</p>");
-                body.AppendLine($"<p><strong>Total:</strong> {order.TotalAmount} {order.Currency}</p>");
-                body.AppendLine($"<p><strong>Estado:</strong> Aprobado</p>");
-                body.AppendLine("<h3>Productos:</h3><ul>");
+
+                // Estilos para el correo
+                body.AppendLine("<html><head><style>");
+                body.AppendLine("body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; color: #333; }");
+                body.AppendLine("h2 { color: #007bff; }");
+                body.AppendLine(".container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }");
+                body.AppendLine(".header { text-align: center; padding-bottom: 20px; }");
+                body.AppendLine("table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }");
+                body.AppendLine("th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }");
+                body.AppendLine("th { background-color: #007bff; color: #fff; }");
+                body.AppendLine(".total { font-weight: bold; background-color: #f8f9fa; }");
+                body.AppendLine(".footer { text-align: center; font-size: 14px; color: #888; }");
+                body.AppendLine(".watermark-container { position: relative; z-index: 1; background-image: url('https://firebasestorage.googleapis.com/v0/b/fireartstudio-8586e.appspot.com/o/images%2FFondoCorreo%2F6a171ca33cfb9f1d1150072c2ce982c5.jpg?alt=media&token=69b00229-f5b0-43df-adf4-52c792c3ee71'); background-repeat: no-repeat; background-position: center; background-size: 500px 500px; opacity: 0.1; text-align: center; padding: 20px; }");
+                body.AppendLine(".content { position: relative; z-index: 2; }");
+                body.AppendLine("</style></head><body>");
+
+                // Contenedor principal
+                body.AppendLine("<div class='container'>");
+
+                // Encabezado
+                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra en ArtStudio!</h2></div>");
+
+                // Información del cliente
+                body.AppendLine("<h3>Detalles del Cliente</h3>");
+                body.AppendLine("<table>");
+                body.AppendLine("<tr><th>Nombre Completo</th><td>" + order.BuyerFullName + "</td></tr>");
+                body.AppendLine("<tr><th>Correo Electrónico</th><td>" + order.BuyerEmail + "</td></tr>");
+                body.AppendLine("<tr><th>Teléfono</th><td>" + order.MobilePhone + "</td></tr>");
+                body.AppendLine("<tr><th>Dirección</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
+                body.AppendLine("<tr><th>Notas del Pedido</th><td>" + order.Extra2 + "</td></tr>");
+                body.AppendLine("</table>");
+
+                // Detalles del Pedido
+                body.AppendLine("<h3>Detalles del Pedido</h3>");
+                body.AppendLine("<table>");
+                body.AppendLine("<tr><th>Referencia del Pedido</th><td>" + order.ReferenceCode + "</td></tr>");
+                body.AppendLine("<tr><th>Total</th><td>" + order.TotalAmount.ToString("C") + "</td></tr>");
+                body.AppendLine("<tr><th>Estado del Pedido</th><td>" + order.OrderStatus + "</td></tr>");
+                body.AppendLine("</table>");
+
+                // Productos
+                body.AppendLine("<h3>Productos</h3>");
+                body.AppendLine("<table>");
+                body.AppendLine("<tr><th>Producto</th><th>Tamaño</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
 
                 foreach (var product in order.Orderproducts)
                 {
-                    body.AppendLine("<li>");
-                    body.AppendLine($"<p><strong>Producto:</strong> {product.ProductName} (Tamaño: {product.TamanhoPoster})</p>");
-                    body.AppendLine($"<p><strong>Precio:</strong> Póster - ${product.PrecioPoster}, Marco - ${product.PrecioMarco}</p>");
-                    body.AppendLine($"<p><strong>Cantidad:</strong> {product.Cantidad}</p>");
-                    body.AppendLine($"<p><strong>Subtotal:</strong> ${product.Subtotal}</p>");
-                    body.AppendLine("</li>");
+                    body.AppendLine("<tr>");
+                    body.AppendLine("<td>" + product.ProductName + "</td>");
+                    body.AppendLine("<td>" + product.TamanhoPoster + "</td>");
+                    body.AppendLine("<td>$" + product.PrecioPoster + " (Marco: $" + product.PrecioMarco + ")</td>");
+                    body.AppendLine("<td>" + product.Cantidad + "</td>");
+                    body.AppendLine("<td>$" + product.Subtotal + "</td>");
+                    body.AppendLine("</tr>");
                 }
-                body.AppendLine("</ul>");
-                body.AppendLine($"<p><strong>Total del Pedido:</strong> {order.TotalAmount} {order.Currency}</p>");
+
+                body.AppendLine("<tr class='total'><td colspan='4'>Total</td><td>$" + order.TotalAmount + "</td></tr>");
+                body.AppendLine("</table>");
+
+                // Cierre del contenedor
+                body.AppendLine("</div>");
+
+                // Pie de página
+                body.AppendLine("<div class='footer'>ArtStudio - Todos los derechos reservados</div>");
+
+                // Cierre de HTML
+                body.AppendLine("</body></html>");
 
                 // Configuración del SMTP
                 var smtp = new SmtpClient
@@ -336,13 +398,13 @@ namespace artstudio.Controllers
                 // Crear el mensaje de correo
                 var message = new MailMessage(fromAddress, toAddress)
                 {
-                    Subject = subject, // Aquí ya no es constante
+                    Subject = subject,
                     Body = body.ToString(),
                     IsBodyHtml = true // El cuerpo del correo es en formato HTML
                 };
 
                 // Enviar el correo
-                smtp.Send(message);
+                await smtp.SendMailAsync(message);
 
                 _logger.LogInformation("Correo de confirmación enviado exitosamente.");
             }
@@ -351,6 +413,9 @@ namespace artstudio.Controllers
                 _logger.LogError(ex, "Error al enviar el correo de confirmación.");
             }
         }
+
+
+
 
 
 
