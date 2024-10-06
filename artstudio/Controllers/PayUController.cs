@@ -311,14 +311,13 @@ namespace artstudio.Controllers
                 var fromAddress = new MailAddress("pedidosartstudio@gmail.com", "ArtStudio Store");
                 var toAddress = new MailAddress("artstudiomg2024@gmail.com"); // Correo de la tienda o destinatario
                 string fromPassword = "fwjzycoliosyjgux";
-
                 string subject = $"Nuevo Pedido Aprobado: {order.ReferenceCode}";
 
-                // Crear el cuerpo del correo con datos ordenados en una tabla
+                // Crear el cuerpo del correo con datos ordenados en una tabla y configurado en UTF-8
                 var body = new StringBuilder();
 
                 // Estilos para el correo
-                body.AppendLine("<html><head><style>");
+                body.AppendLine("<html><head><meta charset='UTF-8'><style>");
                 body.AppendLine("body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; color: #333; }");
                 body.AppendLine("h2 { color: #007bff; }");
                 body.AppendLine(".container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }");
@@ -336,7 +335,7 @@ namespace artstudio.Controllers
                 body.AppendLine("<div class='container'>");
 
                 // Encabezado
-                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra en ArtStudio!</h2></div>");
+                body.AppendLine("<div class='header'><h2>Recibiste un nuevo pedido en ArtStudio!</h2></div>");
 
                 // Información del cliente
                 body.AppendLine("<h3>Detalles del Cliente</h3>");
@@ -345,7 +344,8 @@ namespace artstudio.Controllers
                 body.AppendLine("<tr><th>Correo Electrónico</th><td>" + order.BuyerEmail + "</td></tr>");
                 body.AppendLine("<tr><th>Teléfono</th><td>" + order.MobilePhone + "</td></tr>");
                 body.AppendLine("<tr><th>Dirección</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
-                body.AppendLine("<tr><th>Notas del Pedido</th><td>" + order.Extra2 + "</td></tr>");
+                body.AppendLine("<tr><th>Código Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
+                body.AppendLine("<tr><th>Notas del Pedido</th><td>" + (order.Extra1 ?? "Ninguna") + "</td></tr>");
                 body.AppendLine("</table>");
 
                 // Detalles del Pedido
@@ -413,6 +413,7 @@ namespace artstudio.Controllers
                 _logger.LogError(ex, "Error al enviar el correo de confirmación.");
             }
         }
+
 
 
 
