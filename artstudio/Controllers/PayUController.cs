@@ -344,7 +344,8 @@ namespace artstudio.Controllers
                 body.AppendLine("<tr><th>Teléfono</th><td>" + order.MobilePhone + "</td></tr>");
                 body.AppendLine("<tr><th>Dirección</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
                 body.AppendLine("<tr><th>Código Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
-                body.AppendLine("<tr><th>Notas del Pedido</th><td>" + (order.Extra1 ?? "Ninguna") + "</td></tr>");
+                body.AppendLine("<tr><th>Detalles de la dirección</th><td>" + (order.Extra1 ?? "Ninguna") + "</td></tr>");
+                body.AppendLine("<tr><th>Notas del Pedido</th><td>" + (order.Extra2 ?? "Ninguna") + "</td></tr>");
                 body.AppendLine("</table>");
 
                 // Detalles del Pedido
