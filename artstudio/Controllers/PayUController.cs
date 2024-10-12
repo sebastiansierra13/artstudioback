@@ -199,13 +199,11 @@ namespace artstudio.Controllers
                     return BadRequest("Firma inválida.");
                 }
 
-                // Obtener el entorno actual desde las variables de entorno
-                var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                // Interpretar correctamente los estados de la transacción
+                string estadoTransaccion = GetTransactionStateMessage(response.TransactionState);
 
-               
-               
-                // Codificar todos los parámetros que podrían tener caracteres especiales
-                string estado = Uri.EscapeDataString(GetTransactionStateMessage(response.TransactionState));
+                // Codificar los parámetros
+                string estado = Uri.EscapeDataString(estadoTransaccion);
                 string referencia = Uri.EscapeDataString(response.ReferenceCode);
                 string valor = Uri.EscapeDataString(response.TX_VALUE.ToString(CultureInfo.InvariantCulture));
                 string moneda = Uri.EscapeDataString(response.Currency);
@@ -216,7 +214,7 @@ namespace artstudio.Controllers
 
                 // Configurar la URL del frontend según el entorno
                 string frontendUrl;
-                if (environment == "Production")
+                if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Production")
                 {
                     frontendUrl = $"https://artstudio.com.co/order-summary?estado={estado}&referencia={referencia}&valor={valor}&moneda={moneda}&fecha={fecha}&metodoPago={metodoPago}&descripcion={descripcion}&authorizationCode={authorizationCode}";
                 }
@@ -234,6 +232,7 @@ namespace artstudio.Controllers
                 return StatusCode(500, "Error en el procesamiento.");
             }
         }
+
 
 
         [HttpGet("order-details")]
@@ -423,14 +422,15 @@ namespace artstudio.Controllers
         // Método auxiliar para obtener un mensaje claro del estado de la transacción
         private string GetTransactionStateMessage(string transactionState)
         {
-            switch (transactionState)
+            return transactionState switch
             {
-                case "4": return "Transacción aprobada";
-                case "6": return "Transacción rechazada";
-                case "7": return "Pago pendiente";
-                default: return "Estado desconocido";
-            }
+                "4" => "aprobada",  // Aprobada
+                "6" => "declinada", // Declinado
+                "7" => "pendiente", // Pendiente
+                _ => "desconocida"  // Cualquier otro estado
+            };
         }
+
 
 
         // Método para validar productos, medidas y precios

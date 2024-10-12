@@ -52,9 +52,9 @@ try
         options.ResponseUrl = Environment.GetEnvironmentVariable("PayU_ResponseUrl") ;
         options.ConfirmationUrl = Environment.GetEnvironmentVariable("PayU_ConfirmationUrl");
         // Convertir el valor de la variable de entorno "PayU_TestMode" en booleano
-        //var testMode = Environment.GetEnvironmentVariable("PayU_TestMode");
-        //options.TestMode = !string.IsNullOrEmpty(testMode) && testMode == "1";  // Si es "1", lo asigna como true, de lo contrario false
-        options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl");
+        var testMode = Environment.GetEnvironmentVariable("PayU_TestMode");
+        options.TestMode = !string.IsNullOrEmpty(testMode) && testMode == "1";  // Si es "1", lo asigna como true, de lo contrario false
+        options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl") ?? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
         options.ProductionUrl = Environment.GetEnvironmentVariable("PayU_ProductionUrl") ?? "https://checkout.payulatam.com/ppp-web-gateway-payu/";
     });
 
