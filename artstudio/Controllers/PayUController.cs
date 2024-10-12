@@ -309,7 +309,7 @@ namespace artstudio.Controllers
                 // Configuración del correo
                 var fromAddress = new MailAddress("pedidosartstudio@gmail.com", "ArtStudio Store");
                 var toAddress = new MailAddress("artstudiomg2024@gmail.com"); // Correo de la tienda o destinatario
-                string fromPassword = "fwjzycoliosyjgux";
+                string fromPassword = "jboylagpzsgkmreg ";
                 string subject = $"Nuevo Pedido Aprobado: {order.ReferenceCode}";
 
                 // Crear el cuerpo del correo con datos ordenados en una tabla y configurado en UTF-8
