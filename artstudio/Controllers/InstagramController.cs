@@ -46,20 +46,28 @@ namespace artstudio.Controllers
             return Ok(new { status = "No se almacenan datos personales de los usuarios." });
         }
 
-        [HttpPost("store-token")]
-        public async Task<IActionResult> StoreToken([FromBody] string accessToken)
+        public class TokenRequest
         {
+            public string AccessToken { get; set; }
+        }
+
+        [HttpPost("store-token")]
+        public async Task<IActionResult> StoreToken([FromBody] TokenRequest request)
+        {
+            if (string.IsNullOrEmpty(request?.AccessToken))
+            {
+                return BadRequest("AccessToken is required.");
+            }
+
             var token = new Instagramtoken
             {
-                AccessToken = accessToken,
+                AccessToken = request.AccessToken,
                 CreatedAt = DateTime.UtcNow,
                 ExpiryDate = DateTime.UtcNow.AddDays(60)
             };
-
             _context.Instagramtokens.Add(token);
             await _context.SaveChangesAsync();
-
             return Ok("Token almacenado exitosamente.");
         }
     }
-}
+    }
