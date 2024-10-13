@@ -31,9 +31,21 @@ builder.Services.AddDbContext<MiDbContext>(options =>
 builder.Configuration.AddJsonFile("appsettings.json");
 
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/api/auth/login";
+        options.LogoutPath = "/api/auth/logout";
+        options.AccessDeniedPath = "/api/auth/denied";
+    });
+
+
+builder.Services.AddAuthorization();
+
+
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
                                     builder => builder.AllowAnyOrigin()
-                                                    .WithOrigins("https://artstudio.com.co")
+                                                    .WithOrigins("http://localhost:4200")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
                                                     .AllowCredentials())); // Permite el uso de cookies));
@@ -82,15 +94,6 @@ builder.Services.AddDbContext<MiDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("connectMPDis"))));
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/api/auth/login";
-        options.LogoutPath = "/api/auth/logout";
-        options.AccessDeniedPath = "/api/auth/denied";
-    });
-
-builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
