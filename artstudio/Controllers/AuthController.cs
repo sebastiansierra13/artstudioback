@@ -62,34 +62,44 @@ namespace artstudio.Controllers
             return Ok(new { success = true, message = "Sesión cerrada" });
         }
 
-        [HttpPut("update-password")]
-        public IActionResult UpdatePassword([FromBody] UpdatePasswordRequest request)
+        // Método para cambiar la contraseña
+        [HttpPost("change-password")]
+        public IActionResult ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
-            try
+            var adminInDb = _context.Admins.FirstOrDefault(a => a.User == changePasswordDto.User);
+            if (adminInDb == null)
             {
-                // Buscar al admin en la base de datos
-                var adminInDb = _context.Admins.FirstOrDefault(a => a.User == request.User);
-                if (adminInDb != null)
-                {
-                    var passwordHasher = new PasswordHasher<Admin>();
-
-                    // Hashear la nueva contraseña
-                    adminInDb.Password = passwordHasher.HashPassword(adminInDb, request.NewPassword);
-
-                    // Guardar los cambios
-                    _context.SaveChanges();
-
-                    return Ok("Password updated successfully");
-                }
-                else
-                {
-                    return NotFound("Admin not found");
-                }
+                return NotFound("Admin not found");
             }
-            catch (Exception ex)
+
+            // Verifica si la contraseña actual es correcta
+            if (adminInDb.Password != changePasswordDto.CurrentPassword)
             {
-                return BadRequest($"An error occurred: {ex.Message}");
+                return Unauthorized("Current password is incorrect");
             }
+
+            // Hashea la nueva contraseña
+            adminInDb.Password = _passwordHasher.HashPassword(adminInDb, changePasswordDto.NewPassword);
+            _context.SaveChanges();
+
+            return Ok("Password changed successfully");
+        }
+
+        // Método para hashear contraseñas
+        [HttpPost("hash-passwords")]
+        public IActionResult HashPasswords()
+        {
+            var admins = _context.Admins.ToList();
+            var passwordHasher = new PasswordHasher<Admin>();
+
+            foreach (var admin in admins)
+            {
+                // Hashea la contraseña y actualiza en la base de datos
+                admin.Password = passwordHasher.HashPassword(admin, admin.Password);
+            }
+
+            _context.SaveChanges();
+            return Ok("Passwords hashed successfully");
         }
 
     }
@@ -108,9 +118,4 @@ namespace artstudio.Controllers
         public string NewPassword { get; set; } = null!;
     }
 
-    public class UpdatePasswordRequest
-    {
-        public string User { get; set; }
-        public string NewPassword { get; set; }
-    }
 }
