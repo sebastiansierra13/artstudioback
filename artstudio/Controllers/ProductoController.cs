@@ -91,11 +91,19 @@ namespace artstudio.Controllers
                 return BadRequest("El nombre del producto es requerido");
             }
 
+            // Verificar si el ID ya existe para evitar duplicados
+            var existingProduct = await _context.Productos.FindAsync(producto.IdProducto);
+            if (existingProduct != null)
+            {
+                return Conflict("El ID del producto ya existe. Intente de nuevo.");
+            }
+
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetProducto), new { id = producto.IdProducto }, producto);
         }
+
 
         // GET: api/productos/categoria/5
         [HttpGet("categoria/{idCategoria}")]

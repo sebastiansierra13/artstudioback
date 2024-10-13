@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using artstudio.Models;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using artstudio.DTOs; // Asegúrate de tener esta directiva
-using artstudio.Configuration;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.Options;
+using artstudio.DTOs;
+using artstudio.Configuration;
 
 namespace artstudio.Services
 {
@@ -24,12 +24,12 @@ namespace artstudio.Services
         private readonly MiDbContext _context;
         private readonly InstagramSettings _instagramSettings;
 
-        // Cambia el constructor para recibir IOptions<InstagramSettings>
+        // Usar IOptions<InstagramSettings> para la configuración
         public InstagramService(HttpClient httpClient, MiDbContext context, IOptions<InstagramSettings> instagramSettings)
         {
             _httpClient = httpClient;
             _context = context;
-            _instagramSettings = instagramSettings.Value;  // Obtiene el valor real de IOptions
+            _instagramSettings = instagramSettings.Value;
         }
 
         public async Task<List<InstagramPostDTO>> GetLatestPostsAsync()
@@ -43,10 +43,9 @@ namespace artstudio.Services
                 throw new Exception("No se encontró un token de acceso.");
             }
 
-            // Verificar si el token ha expirado o está por expirar en las próximas 24 horas
+            // Verificar si el token está a punto de expirar (menos de 24 horas)
             if (token.ExpiryDate <= DateTime.UtcNow || (token.ExpiryDate - DateTime.UtcNow).TotalHours < 24)
             {
-                // Intentar actualizar el token
                 token = await RefreshAccessTokenAsync(token);
             }
 
