@@ -45,7 +45,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
                                     builder => builder.AllowAnyOrigin()
-                                                    .WithOrigins("http://localhost:4200")
+                                                    .WithOrigins("https://artstudio.com.co")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
                                                     .AllowCredentials())); // Permite el uso de cookies));
