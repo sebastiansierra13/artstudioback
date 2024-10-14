@@ -459,11 +459,11 @@ namespace artstudio.Controllers
                 body.AppendLine("<div class='container'>");
 
                 // Encabezado
-                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra en ArtStudio!</h2></div>");
+                body.AppendLine("<div class='header'><h2>Gracias por tu compra en ArtStudio!</h2></div>");
 
                 // Mensaje de agradecimiento
                 body.AppendLine("<p>Hola " + order.BuyerFullName + ",</p>");
-                body.AppendLine("<p>Gracias por confiar en nosotros. Aquí te dejamos los detalles de tu pedido:</p>");
+                body.AppendLine("<p>Gracias por confiar en nosotros. Aqu&iacute; te dejamos los detalles de tu pedido:</p>");
 
                 // Detalles del Pedido
                 body.AppendLine("<h3>Detalles del Pedido</h3>");
@@ -493,7 +493,7 @@ namespace artstudio.Controllers
                 body.AppendLine("</table>");
 
                 // Datos de contacto
-                body.AppendLine("<h3>Detalles de envío</h3>");
+                body.AppendLine("<h3>Detalles de env&iacute;o</h3>");
                 body.AppendLine("<table>");
                 body.AppendLine("<tr><th>Nombre Completo</th><td>" + order.BuyerFullName + "</td></tr>");
                 body.AppendLine("<tr><th>Correo Electr&oacute;nico</th><td>" + order.BuyerEmail + "</td></tr>");
@@ -506,10 +506,10 @@ namespace artstudio.Controllers
                 body.AppendLine("<p>Si tienes alguna duda, no dudes en contactarnos:</p>");
                 body.AppendLine("<p><strong>WhatsApp:</strong> +57 320 908 9395</p>");
                 body.AppendLine("<p><strong>Correo Electr&oacute;nico:</strong> contacto@artstudio.com</p>");
-                body.AppendLine("<p><strong>Direcci&oacute;n:</strong> Calle 52 #19-22, Bogotá</p>");
+                body.AppendLine("<p><strong>Direcci&oacute;n:</strong> Calle 52 #19-22, Bogot&aacute;</p>");
 
                 // Mensaje de "No responder"
-                body.AppendLine("<p><strong>Importante:</strong> Este es un correo automático, por favor no respondas directamente a este mensaje.</p>");
+                body.AppendLine("<p><strong>Importante:</strong> Este es un correo autom&aacute;tico, por favor no respondas directamente a este mensaje.</p>");
 
                 // Pie de página
                 body.AppendLine("<div class='footer'>ArtStudio - Todos los derechos reservados</div>");
@@ -547,6 +547,7 @@ namespace artstudio.Controllers
                 _logger.LogError(ex, "Error al enviar el correo de confirmación al comprador.");
             }
         }
+
 
 
 
