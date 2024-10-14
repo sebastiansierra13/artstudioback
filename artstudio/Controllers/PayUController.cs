@@ -338,7 +338,6 @@ namespace artstudio.Controllers
                 body.AppendLine("th { background-color: #007bff; color: #fff; }");
                 body.AppendLine(".total { font-weight: bold; background-color: #f8f9fa; }");
                 body.AppendLine(".footer { text-align: center; font-size: 14px; color: #888; }");
-                body.AppendLine(".watermark-container { position: relative; z-index: 1; background-image: url('https://firebasestorage.googleapis.com/v0/b/fireartstudio-8586e.appspot.com/o/images%2FFondoCorreo%2F6a171ca33cfb9f1d1150072c2ce982c5.jpg?alt=media&token=69b00229-f5b0-43df-adf4-52c792c3ee71'); background-repeat: no-repeat; background-position: center; background-size: 500px 500px; opacity: 0.1; text-align: center; padding: 20px; }");
                 body.AppendLine(".content { position: relative; z-index: 2; }");
                 body.AppendLine("</style></head><body>");
 
@@ -352,11 +351,11 @@ namespace artstudio.Controllers
                 body.AppendLine("<h3>Detalles del Cliente</h3>");
                 body.AppendLine("<table>");
                 body.AppendLine("<tr><th>Nombre Completo</th><td>" + order.BuyerFullName + "</td></tr>");
-                body.AppendLine("<tr><th>Correo Electrónico</th><td>" + order.BuyerEmail + "</td></tr>");
-                body.AppendLine("<tr><th>Teléfono</th><td>" + order.MobilePhone + "</td></tr>");
-                body.AppendLine("<tr><th>Dirección</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
-                body.AppendLine("<tr><th>Código Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
-                body.AppendLine("<tr><th>Detalles de la dirección</th><td>" + (order.Extra1 ?? "Ninguna") + "</td></tr>");
+                body.AppendLine("<tr><th>Correo Electr&oacute;nico</th><td>" + order.BuyerEmail + "</td></tr>");
+                body.AppendLine("<tr><th>Tel&eacute;fono</th><td>" + order.MobilePhone + "</td></tr>");
+                body.AppendLine("<tr><th>Direcci&oacute;n</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
+                body.AppendLine("<tr><th>C&oacute;digo Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
+                body.AppendLine("<tr><th>Detalles de la direcci&oacute;n</th><td>" + (order.Extra1 ?? "Ninguna") + "</td></tr>");
                 body.AppendLine("<tr><th>Notas del Pedido</th><td>" + (order.Extra2 ?? "Ninguna") + "</td></tr>");
                 body.AppendLine("</table>");
 
@@ -371,7 +370,7 @@ namespace artstudio.Controllers
                 // Productos
                 body.AppendLine("<h3>Productos</h3>");
                 body.AppendLine("<table>");
-                body.AppendLine("<tr><th>Producto</th><th>Tamaño</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
+                body.AppendLine("<tr><th>Producto</th><th>Tama&ntilde;o</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
 
                 foreach (var product in order.Orderproducts)
                 {
@@ -412,7 +411,7 @@ namespace artstudio.Controllers
                 {
                     Subject = subject,
                     Body = body.ToString(),
-                    IsBodyHtml = true, // El cuerpo del correo es en formato HTML
+                    IsBodyHtml = true,// El cuerpo del correo es en formato HTML
                     BodyEncoding = Encoding.UTF8 // Establecer la codificación a UTF-8
                 };
 
@@ -426,6 +425,8 @@ namespace artstudio.Controllers
                 _logger.LogError(ex, "Error al enviar el correo de confirmación.");
             }
         }
+
+
 
         private async Task SendOrderConfirmationToBuyer(Order order)
         {
@@ -451,7 +452,6 @@ namespace artstudio.Controllers
                 body.AppendLine("th { background-color: #007bff; color: #fff; }");
                 body.AppendLine(".total { font-weight: bold; background-color: #f8f9fa; }");
                 body.AppendLine(".footer { text-align: center; font-size: 14px; color: #888; padding-top: 20px; }");
-                body.AppendLine(".watermark-container { position: relative; z-index: 1; background-image: url('https://firebasestorage.googleapis.com/v0/b/fireartstudio-8586e.appspot.com/o/images%2FFondoCorreo%2F6a171ca33cfb9f1d1150072c2ce982c5.jpg?alt=media&token=69b00229-f5b0-43df-adf4-52c792c3ee71'); background-repeat: no-repeat; background-position: center; background-size: 500px 500px; opacity: 0.1; text-align: center; padding: 20px; }");
                 body.AppendLine(".content { position: relative; z-index: 2; }");
                 body.AppendLine("</style></head><body>");
 
@@ -459,10 +459,14 @@ namespace artstudio.Controllers
                 body.AppendLine("<div class='container'>");
 
                 // Encabezado
-                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra!</h2></div>");
+                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra en ArtStudio!</h2></div>");
 
-                // Información del pedido
-                body.AppendLine("<h3>Detalles de tu pedido</h3>");
+                // Mensaje de agradecimiento
+                body.AppendLine("<p>Hola " + order.BuyerFullName + ",</p>");
+                body.AppendLine("<p>Gracias por confiar en nosotros. Aquí te dejamos los detalles de tu pedido:</p>");
+
+                // Detalles del Pedido
+                body.AppendLine("<h3>Detalles del Pedido</h3>");
                 body.AppendLine("<table>");
                 body.AppendLine("<tr><th>Referencia del Pedido</th><td>" + order.ReferenceCode + "</td></tr>");
                 body.AppendLine("<tr><th>Total</th><td>" + order.TotalAmount.ToString("C") + "</td></tr>");
@@ -470,9 +474,9 @@ namespace artstudio.Controllers
                 body.AppendLine("</table>");
 
                 // Productos
-                body.AppendLine("<h3>Productos comprados</h3>");
+                body.AppendLine("<h3>Productos adquiridos</h3>");
                 body.AppendLine("<table>");
-                body.AppendLine("<tr><th>Producto</th><th>Tamaño</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
+                body.AppendLine("<tr><th>Producto</th><th>Tama&ntilde;o</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
 
                 foreach (var product in order.Orderproducts)
                 {
@@ -488,8 +492,24 @@ namespace artstudio.Controllers
                 body.AppendLine("<tr class='total'><td colspan='4'>Total</td><td>$" + order.TotalAmount + "</td></tr>");
                 body.AppendLine("</table>");
 
-                // Cierre del contenedor
-                body.AppendLine("</div>");
+                // Datos de contacto
+                body.AppendLine("<h3>Detalles de envío</h3>");
+                body.AppendLine("<table>");
+                body.AppendLine("<tr><th>Nombre Completo</th><td>" + order.BuyerFullName + "</td></tr>");
+                body.AppendLine("<tr><th>Correo Electr&oacute;nico</th><td>" + order.BuyerEmail + "</td></tr>");
+                body.AppendLine("<tr><th>Tel&eacute;fono</th><td>" + order.MobilePhone + "</td></tr>");
+                body.AppendLine("<tr><th>Direcci&oacute;n</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
+                body.AppendLine("<tr><th>C&oacute;digo Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
+                body.AppendLine("</table>");
+
+                // Mensaje de contacto
+                body.AppendLine("<p>Si tienes alguna duda, no dudes en contactarnos:</p>");
+                body.AppendLine("<p><strong>WhatsApp:</strong> +57 320 908 9395</p>");
+                body.AppendLine("<p><strong>Correo Electr&oacute;nico:</strong> contacto@artstudio.com</p>");
+                body.AppendLine("<p><strong>Direcci&oacute;n:</strong> Calle 52 #19-22, Bogotá</p>");
+
+                // Mensaje de "No responder"
+                body.AppendLine("<p><strong>Importante:</strong> Este es un correo automático, por favor no respondas directamente a este mensaje.</p>");
 
                 // Pie de página
                 body.AppendLine("<div class='footer'>ArtStudio - Todos los derechos reservados</div>");
@@ -520,13 +540,14 @@ namespace artstudio.Controllers
                 // Enviar el correo
                 await smtp.SendMailAsync(message);
 
-                _logger.LogInformation("Correo de confirmación enviado al comprador exitosamente.");
+                _logger.LogInformation("Correo de confirmación enviado exitosamente al comprador.");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al enviar el correo de confirmación al comprador.");
             }
         }
+
 
 
 
