@@ -21,33 +21,52 @@ namespace artstudio.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] AdminLoginDto adminDto)
         {
-            var adminInDb = _context.Admins.FirstOrDefault(a => a.User == adminDto.User);
-
-            if (adminInDb == null)
+            if (ModelState.IsValid)
             {
-                return Unauthorized(new { success = false, message = "Usuario no encontrado" });
+                // Buscar al administrador en la base de datos por nombre de usuario
+                var adminInDb = _context.Admins.FirstOrDefault(a => a.User == adminDto.User);
+
+                // Verifica si el administrador existe
+                if (adminInDb == null)
+                {
+                    return Unauthorized(new { success = false, message = "Usuario no encontrado" });
+                }
+
+                // Usa PasswordHasher para verificar el hash de la contraseña
+                var passwordHasher = new PasswordHasher<Admin>();
+                var result = passwordHasher.VerifyHashedPassword(adminInDb, adminInDb.Password, adminDto.Password);
+
+                // Verifica si la contraseña es incorrecta
+                if (result != PasswordVerificationResult.Success)
+                {
+                    return Unauthorized(new { success = false, message = "Contraseña incorrecta" });
+                }
+
+                // Si la verificación es correcta, configura la cookie
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true, // Cambiar a true en producción con HTTPS
+                    Expires = DateTime.Now.AddHours(1),
+                    SameSite = SameSiteMode.Lax // Permitir cookies entre orígenes
+                };
+
+                Response.Cookies.Append("admin_session", "true", cookieOptions);
+
+                // Retornar respuesta de éxito
+                return Ok(new { success = true, message = "Login exitoso" });
             }
 
-            // Usa PasswordHasher para verificar el hash
-            var passwordHasher = new PasswordHasher<object>();
-            var result = passwordHasher.VerifyHashedPassword(null, adminInDb.Password, adminDto.Password);
-
-            if (result != PasswordVerificationResult.Success)
-            {
-                return Unauthorized(new { success = false, message = "Contraseña incorrecta" });
-            }
-
-            // Si la verificación es correcta, continúa con la lógica de autenticación.
-            return Ok(new { success = true, message = "Login exitoso" });
+            return BadRequest(ModelState);
         }
-
 
 
         [HttpGet("check-session")]
         [AllowAnonymous]
         public IActionResult CheckSession()
         {
-            if (Request.Cookies.TryGetValue("admin_session", out var session) && session == "true")
+            var session = Request.Cookies["admin_session"];
+            if (session == "true")
             {
                 return Ok(new { authenticated = true });
             }
