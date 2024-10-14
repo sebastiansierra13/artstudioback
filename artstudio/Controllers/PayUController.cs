@@ -412,7 +412,8 @@ namespace artstudio.Controllers
                 {
                     Subject = subject,
                     Body = body.ToString(),
-                    IsBodyHtml = true // El cuerpo del correo es en formato HTML
+                    IsBodyHtml = true, // El cuerpo del correo es en formato HTML
+                    BodyEncoding = Encoding.UTF8 // Establecer la codificación a UTF-8
                 };
 
                 // Enviar el correo
@@ -425,7 +426,6 @@ namespace artstudio.Controllers
                 _logger.LogError(ex, "Error al enviar el correo de confirmación.");
             }
         }
-
 
         private async Task SendOrderConfirmationToBuyer(Order order)
         {
@@ -459,14 +459,10 @@ namespace artstudio.Controllers
                 body.AppendLine("<div class='container'>");
 
                 // Encabezado
-                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra en ArtStudio!</h2></div>");
+                body.AppendLine("<div class='header'><h2>¡Gracias por tu compra!</h2></div>");
 
-                // Mensaje de agradecimiento
-                body.AppendLine("<p>Hola " + order.BuyerFullName + ",</p>");
-                body.AppendLine("<p>Gracias por confiar en nosotros. Aquí te dejamos los detalles de tu pedido:</p>");
-
-                // Detalles del Pedido
-                body.AppendLine("<h3>Detalles del Pedido</h3>");
+                // Información del pedido
+                body.AppendLine("<h3>Detalles de tu pedido</h3>");
                 body.AppendLine("<table>");
                 body.AppendLine("<tr><th>Referencia del Pedido</th><td>" + order.ReferenceCode + "</td></tr>");
                 body.AppendLine("<tr><th>Total</th><td>" + order.TotalAmount.ToString("C") + "</td></tr>");
@@ -474,7 +470,7 @@ namespace artstudio.Controllers
                 body.AppendLine("</table>");
 
                 // Productos
-                body.AppendLine("<h3>Productos adquiridos</h3>");
+                body.AppendLine("<h3>Productos comprados</h3>");
                 body.AppendLine("<table>");
                 body.AppendLine("<tr><th>Producto</th><th>Tamaño</th><th>Precio</th><th>Cantidad</th><th>Subtotal</th></tr>");
 
@@ -492,24 +488,8 @@ namespace artstudio.Controllers
                 body.AppendLine("<tr class='total'><td colspan='4'>Total</td><td>$" + order.TotalAmount + "</td></tr>");
                 body.AppendLine("</table>");
 
-                // Datos de contacto
-                body.AppendLine("<h3>Detalles de envío</h3>");
-                body.AppendLine("<table>");
-                body.AppendLine("<tr><th>Nombre Completo</th><td>" + order.BuyerFullName + "</td></tr>");
-                body.AppendLine("<tr><th>Correo Electrónico</th><td>" + order.BuyerEmail + "</td></tr>");
-                body.AppendLine("<tr><th>Teléfono</th><td>" + order.MobilePhone + "</td></tr>");
-                body.AppendLine("<tr><th>Dirección</th><td>" + order.StreetName + ", " + order.City + ", " + order.Department + "</td></tr>");
-                body.AppendLine("<tr><th>Código Postal</th><td>" + (order.Postcode ?? "No proporcionado") + "</td></tr>");
-                body.AppendLine("</table>");
-
-                // Mensaje de contacto
-                body.AppendLine("<p>Si tienes alguna duda, no dudes en contactarnos:</p>");
-                body.AppendLine("<p><strong>WhatsApp:</strong> +57 320 908 9395</p>");
-                body.AppendLine("<p><strong>Correo Electrónico:</strong> contacto@artstudio.com</p>");
-                body.AppendLine("<p><strong>Dirección:</strong> Calle 52 #19-22, Bogotá</p>");
-
-                // Mensaje de "No responder"
-                body.AppendLine("<p><strong>Importante:</strong> Este es un correo automático, por favor no respondas directamente a este mensaje.</p>");
+                // Cierre del contenedor
+                body.AppendLine("</div>");
 
                 // Pie de página
                 body.AppendLine("<div class='footer'>ArtStudio - Todos los derechos reservados</div>");
@@ -533,13 +513,14 @@ namespace artstudio.Controllers
                 {
                     Subject = subject,
                     Body = body.ToString(),
-                    IsBodyHtml = true // El cuerpo del correo es en formato HTML
+                    IsBodyHtml = true, // El cuerpo del correo es en formato HTML
+                    BodyEncoding = Encoding.UTF8 // Establecer la codificación a UTF-8
                 };
 
                 // Enviar el correo
                 await smtp.SendMailAsync(message);
 
-                _logger.LogInformation("Correo de confirmación enviado exitosamente al comprador.");
+                _logger.LogInformation("Correo de confirmación enviado al comprador exitosamente.");
             }
             catch (Exception ex)
             {
