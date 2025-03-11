@@ -4,8 +4,6 @@ using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Globalization;
-using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 
 namespace artstudio.Services

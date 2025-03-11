@@ -3,7 +3,6 @@ using artstudio.Models;
 using artstudio.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1.X509;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);

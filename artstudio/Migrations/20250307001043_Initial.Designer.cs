@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using artstudio.Models;
@@ -11,27 +12,48 @@ using artstudio.Models;
 namespace artstudio.Migrations
 {
     [DbContext(typeof(MiDbContext))]
-    [Migration("20240907171605_AddIdToAdmin")]
-    partial class AddIdToAdmin
+    [Migration("20250307001043_Initial")]
+    partial class Initial
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .UseCollation("utf8mb4_0900_ai_ci")
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "8.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.HasCharSet(modelBuilder, "utf8mb4");
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("Productotag", b =>
+                {
+                    b.Property<int>("IdProducto")
+                        .HasColumnType("int")
+                        .HasColumnName("idProducto");
+
+                    b.Property<int>("IdTag")
+                        .HasColumnType("int")
+                        .HasColumnName("idTag");
+
+                    b.HasKey("IdProducto", "IdTag")
+                        .HasName("PRIMARY")
+                        .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
+
+                    b.HasIndex(new[] { "IdTag" }, "idTag");
+
+                    b.ToTable("productotag", (string)null);
+                });
 
             modelBuilder.Entity("artstudio.Models.Admin", b =>
                 {
-                    b.Property<string>("User")
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("user");
-
                     b.Property<int>("Id")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -39,8 +61,13 @@ namespace artstudio.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("password");
 
-                    b.HasKey("User")
-                        .HasName("PRIMARY");
+                    b.Property<string>("User")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("user");
+
+                    b.HasKey("Id");
 
                     b.ToTable("admin", (string)null);
                 });
@@ -51,6 +78,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("Posicion")
                         .HasColumnType("int")
@@ -81,6 +110,8 @@ namespace artstudio.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idCategoria");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdCategoria"));
+
                     b.Property<string>("ImagenCategoria")
                         .HasMaxLength(3000)
                         .HasColumnType("varchar(3000)")
@@ -104,6 +135,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Section")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -124,6 +157,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("CodigoDane")
                         .HasColumnType("int")
@@ -169,6 +204,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("AccessToken")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -194,6 +231,8 @@ namespace artstudio.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<int>("CodigoDane")
                         .HasColumnType("int")
                         .HasColumnName("codigo_dane");
@@ -216,6 +255,155 @@ namespace artstudio.Migrations
                 });
 
             modelBuilder.Entity("artstudio.Models.Order", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<string>("Apartment")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("BuyerEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("BuyerFullName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("varchar(10)")
+                        .HasDefaultValueSql("'COP'");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Extra1")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Extra2")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("MobilePhone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Neighborhood")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasDefaultValueSql("'Pending'");
+
+                    b.Property<string>("Postcode")
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("ReferenceCode")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("StreetName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("timestamp")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlComputedColumn(b.Property<DateTime?>("UpdatedAt"));
+
+                    b.HasKey("OrderId");
+
+                    b.ToTable("order", (string)null);
+                });
+
+            modelBuilder.Entity("artstudio.Models.Orderproduct", b =>
+                {
+                    b.Property<int>("OrderProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("OrderProductId"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioMarco")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("PrecioPoster")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<long?>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ProductImageUrl")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("TamanhoPoster")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("OrderProductId");
+
+                    b.HasIndex(new[] { "OrderId" }, "OrderId");
+
+                    b.ToTable("orderproduct", (string)null);
+                });
+
+            modelBuilder.Entity("artstudio.Models.Ordersunused", b =>
                 {
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
@@ -250,9 +438,10 @@ namespace artstudio.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime");
 
-                    b.HasKey("OrderId");
+                    b.HasKey("OrderId")
+                        .HasName("PRIMARY");
 
-                    b.ToTable("orders", (string)null);
+                    b.ToTable("ordersunused", (string)null);
                 });
 
             modelBuilder.Entity("artstudio.Models.Paymenttransaction", b =>
@@ -294,7 +483,8 @@ namespace artstudio.Migrations
                     b.HasKey("TransactionId")
                         .HasName("PRIMARY");
 
-                    b.HasIndex(new[] { "OrderId" }, "OrderId");
+                    b.HasIndex(new[] { "OrderId" }, "OrderId")
+                        .HasDatabaseName("OrderId1");
 
                     b.ToTable("paymenttransactions", (string)null);
                 });
@@ -305,6 +495,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("idPrecio");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdPrecio"));
 
                     b.Property<decimal>("PrecioMarco")
                         .HasPrecision(10, 2)
@@ -333,6 +525,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("idProducto");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdProducto"));
 
                     b.Property<int>("CantVendido")
                         .HasColumnType("int")
@@ -387,6 +581,8 @@ namespace artstudio.Migrations
                         .HasColumnType("int")
                         .HasColumnName("id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -404,6 +600,8 @@ namespace artstudio.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("idSort");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdSort"));
 
                     b.Property<string>("DescripcionSort")
                         .HasColumnType("text");
@@ -427,6 +625,8 @@ namespace artstudio.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idTag");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdTag"));
+
                     b.Property<string>("DescripcionTag")
                         .HasColumnType("text");
 
@@ -444,21 +644,19 @@ namespace artstudio.Migrations
 
             modelBuilder.Entity("Productotag", b =>
                 {
-                    b.Property<int>("IdProducto")
-                        .HasColumnType("int")
-                        .HasColumnName("idProducto");
+                    b.HasOne("artstudio.Models.Producto", null)
+                        .WithMany()
+                        .HasForeignKey("IdProducto")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("productotag_ibfk_1");
 
-                    b.Property<int>("IdTag")
-                        .HasColumnType("int")
-                        .HasColumnName("idTag");
-
-                    b.HasKey("IdProducto", "IdTag")
-                        .HasName("PRIMARY")
-                        .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
-
-                    b.HasIndex(new[] { "IdTag" }, "idTag");
-
-                    b.ToTable("productotag", (string)null);
+                    b.HasOne("artstudio.Models.Tag", null)
+                        .WithMany()
+                        .HasForeignKey("IdTag")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("productotag_ibfk_2");
                 });
 
             modelBuilder.Entity("artstudio.Models.Departamento", b =>
@@ -481,9 +679,21 @@ namespace artstudio.Migrations
                     b.Navigation("Departamento");
                 });
 
-            modelBuilder.Entity("artstudio.Models.Paymenttransaction", b =>
+            modelBuilder.Entity("artstudio.Models.Orderproduct", b =>
                 {
                     b.HasOne("artstudio.Models.Order", "Order")
+                        .WithMany("Orderproducts")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("orderproduct_ibfk_1");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("artstudio.Models.Paymenttransaction", b =>
+                {
+                    b.HasOne("artstudio.Models.Ordersunused", "Order")
                         .WithMany("Paymenttransactions")
                         .HasForeignKey("OrderId")
                         .HasConstraintName("paymenttransactions_ibfk_1");
@@ -502,23 +712,6 @@ namespace artstudio.Migrations
                     b.Navigation("IdCategoriaNavigation");
                 });
 
-            modelBuilder.Entity("Productotag", b =>
-                {
-                    b.HasOne("artstudio.Models.Producto", null)
-                        .WithMany()
-                        .HasForeignKey("IdProducto")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("productotag_ibfk_1");
-
-                    b.HasOne("artstudio.Models.Tag", null)
-                        .WithMany()
-                        .HasForeignKey("IdTag")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("productotag_ibfk_2");
-                });
-
             modelBuilder.Entity("artstudio.Models.Categoria", b =>
                 {
                     b.Navigation("Productos");
@@ -530,6 +723,11 @@ namespace artstudio.Migrations
                 });
 
             modelBuilder.Entity("artstudio.Models.Order", b =>
+                {
+                    b.Navigation("Orderproducts");
+                });
+
+            modelBuilder.Entity("artstudio.Models.Ordersunused", b =>
                 {
                     b.Navigation("Paymenttransactions");
                 });

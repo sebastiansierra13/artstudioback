@@ -61,6 +61,28 @@ namespace artstudio.Controllers
         }
 
 
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] AdminLoginDto adminDto)
+        {
+            if (_context.Admins.Any(a => a.User == adminDto.User))
+            {
+                return BadRequest(new { success = false, message = "El usuario ya existe" });
+            }
+
+            var admin = new Admin
+            {
+                User = adminDto.User,
+                Password = _passwordHasher.HashPassword(null, adminDto.Password) // Hashear la contraseña
+            };
+
+            _context.Admins.Add(admin);
+            _context.SaveChanges();
+
+            return Ok(new { success = true, message = "Administrador registrado correctamente" });
+        }
+
+
+
         [HttpGet("check-session")]
         [AllowAnonymous]
         public IActionResult CheckSession()
