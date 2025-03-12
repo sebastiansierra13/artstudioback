@@ -97,6 +97,7 @@ builder.Services.Configure<InstagramSettings>(options =>
 
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<IPayUService, PayUService>();
 builder.Services.AddDbContext<MiDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
