@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuración de JSON en controladores
+// Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -17,17 +17,19 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configuración de la base de datos
 builder.Services.AddDbContext<MiDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
     ServerVersion.Parse("8.4.0-mysql")));
 
 builder.Configuration.AddJsonFile("appsettings.json");
 
-// Configuración de autenticación con cookies
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -36,37 +38,44 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/api/auth/denied";
     });
 
+
 builder.Services.AddAuthorization();
 
-// Configuración de CORS para permitir solicitudes desde Angular
+
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
-                                    policy => policy.WithOrigins("https://artstudio.com.co")
+                                    builder => builder.AllowAnyOrigin()
+                                                    .WithOrigins("https://artstudio.com.co")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
-                                                    .AllowCredentials()));
+                                                    .AllowCredentials())); // Permite el uso de cookies));
 
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IInstagramService, InstagramService>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-
 // Configuración de PayU desde variables de entorno
-builder.Services.Configure<PayUSettings>(options =>
+try
 {
-    options.MerchantId = Environment.GetEnvironmentVariable("PayU_MerchantId");
-    options.AccountId = Environment.GetEnvironmentVariable("PayU_AccountId");
-    options.ApiKey = Environment.GetEnvironmentVariable("PayU_ApiKey");
-    options.ResponseUrl = Environment.GetEnvironmentVariable("PayU_ResponseUrl");
-    options.ConfirmationUrl = Environment.GetEnvironmentVariable("PayU_ConfirmationUrl");
-    options.TestMode = Environment.GetEnvironmentVariable("PayU_TestMode") == "1";
-    options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl") ?? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
-    options.ProductionUrl = Environment.GetEnvironmentVariable("PayU_ProductionUrl") ?? "https://checkout.payulatam.com/ppp-web-gateway-payu/";
-});
+    builder.Services.Configure<PayUSettings>(options =>
+    {
+        options.MerchantId = Environment.GetEnvironmentVariable("PayU_MerchantId");
+        options.AccountId = Environment.GetEnvironmentVariable("PayU_AccountId");
+        options.ApiKey = Environment.GetEnvironmentVariable("PayU_ApiKey");
+        options.ResponseUrl = Environment.GetEnvironmentVariable("PayU_ResponseUrl") ;
+        options.ConfirmationUrl = Environment.GetEnvironmentVariable("PayU_ConfirmationUrl");
+        // Convertir el valor de la variable de entorno "PayU_TestMode" en booleano
+        var testMode = Environment.GetEnvironmentVariable("PayU_TestMode");
+        options.TestMode = !string.IsNullOrEmpty(testMode) && testMode == "1";  // Si es "1", lo asigna como true, de lo contrario false
+        options.SandboxUrl = Environment.GetEnvironmentVariable("PayU_SandboxUrl") ?? "https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/";
+        options.ProductionUrl = Environment.GetEnvironmentVariable("PayU_ProductionUrl") ?? "https://checkout.payulatam.com/ppp-web-gateway-payu/";
+    });
 
-// Configuración de Kestrel (Solo HTTP en producción)
-builder.WebHost.ConfigureKestrel(serverOptions =>
+}
+catch (Exception ex)
 {
-    serverOptions.ListenAnyIP(5003); // Solo HTTP
-});
+    Console.WriteLine($"Error: {ex.Message}");
+}
+
+
 
 // Configuración de Instagram desde variables de entorno
 builder.Services.Configure<InstagramSettings>(options =>
@@ -75,24 +84,31 @@ builder.Services.Configure<InstagramSettings>(options =>
     options.ClientSecret = Environment.GetEnvironmentVariable("Instagram_ClientSecret") ?? "2d55fca19782ec6f9f77e5d48b34b943";
 });
 
-// Agregar servicios
+
+
+
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<IPayUService, PayUService>();
+builder.Services.AddDbContext<MiDbContext>(options =>
+    options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
+    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("connectMPDis"))));
+
 
 var app = builder.Build();
 
-// Configuración de Swagger solo en desarrollo
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseAuthentication(); // Añadir antes de UseAuthorization
+app.UseAuthorization();
 
-app.UseRouting();
+app.UseHttpsRedirection();
 app.UseCors("AllowAngularOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.MapControllers();
 
