@@ -76,6 +76,15 @@ catch (Exception ex)
 }
 
 
+builder = WebApplication.CreateBuilder(args);
+
+// Agrega esto para asegurarte de que escucha en todas las interfaces
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5000); // Puerto HTTP
+    serverOptions.ListenAnyIP(443, listenOptions => listenOptions.UseHttps()); // Puerto HTTPS
+});
+
 
 // Configuración de Instagram desde variables de entorno
 builder.Services.Configure<InstagramSettings>(options =>
@@ -84,10 +93,12 @@ builder.Services.Configure<InstagramSettings>(options =>
     options.ClientSecret = Environment.GetEnvironmentVariable("Instagram_ClientSecret") ?? "2d55fca19782ec6f9f77e5d48b34b943";
 });
 
-
+// Agregar servicios de controladores
+builder.Services.AddControllers();
 
 
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddAuthorization();
 builder.Services.AddScoped<IPayUService, PayUService>();
 builder.Services.AddDbContext<MiDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
@@ -99,12 +110,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
     app.UseSwaggerUI();
 }
 app.UseAuthentication(); // Añadir antes de UseAuthorization
 app.UseAuthorization();
 
+app.UseRouting();
 app.UseHttpsRedirection();
 app.UseCors("AllowAngularOrigins");
 app.UseAuthentication();
