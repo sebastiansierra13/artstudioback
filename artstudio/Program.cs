@@ -76,15 +76,6 @@ catch (Exception ex)
 }
 
 
-builder = WebApplication.CreateBuilder(args);
-
-// Agrega esto para asegurarte de que escucha en todas las interfaces
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.ListenAnyIP(5000); // Puerto HTTP
-    serverOptions.ListenAnyIP(443, listenOptions => listenOptions.UseHttps()); // Puerto HTTPS
-});
-
 
 // Configuración de Instagram desde variables de entorno
 builder.Services.Configure<InstagramSettings>(options =>
@@ -97,7 +88,6 @@ builder.Services.Configure<InstagramSettings>(options =>
 
 
 builder.Services.AddScoped<ProductService>();
-builder.Services.AddAuthorization();
 builder.Services.AddScoped<IPayUService, PayUService>();
 builder.Services.AddDbContext<MiDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("connectMPDis"),
