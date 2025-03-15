@@ -103,7 +103,7 @@ var app = builder.Build();
 app.UseAuthentication(); // Añadir antes de UseAuthorization
 app.UseAuthorization();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseCors("AllowAngularOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
