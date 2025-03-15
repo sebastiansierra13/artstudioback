@@ -43,8 +43,7 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddCors(options => options.AddPolicy("AllowAngularOrigins",
-                                    builder => builder.AllowAnyOrigin()
-                                                    .WithOrigins("https://artstudio.com.co")
+                                    builder => builder.WithOrigins("https://artstudio.com.co")
                                                     .AllowAnyHeader()
                                                     .AllowAnyMethod()
                                                     .AllowCredentials())); // Permite el uso de cookies));
@@ -97,17 +96,20 @@ builder.Services.AddDbContext<MiDbContext>(options =>
 var app = builder.Build();
 
 
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
+}
 
-app.UseAuthentication(); // Añadir antes de UseAuthorization
-app.UseAuthorization();
 
-//app.UseHttpsRedirection();
+
+app.UseHttpsRedirection();
 app.UseCors("AllowAngularOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapGet("/", () => "API de ArtStudio funcionando correctamente");
 app.Run();
