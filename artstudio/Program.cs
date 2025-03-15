@@ -96,12 +96,10 @@ builder.Services.AddDbContext<MiDbContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+
 app.UseAuthentication(); // Añadir antes de UseAuthorization
 app.UseAuthorization();
 
