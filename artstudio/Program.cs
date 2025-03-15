@@ -112,4 +112,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapGet("/", () => "API de ArtStudio funcionando correctamente");
+// Añade esta línea antes de app.Run()
+if (app.Environment.IsDevelopment() || true) // Forzar detalles de error
+{
+    app.UseDeveloperExceptionPage();
+}
 app.Run();
